@@ -33,6 +33,16 @@
 		const found = destinations.find((d) => d.id === selectedDestination);
 		return found?.dates ?? [];
 	}
+
+	function handlePhoneInput(event) {
+		event.target.value = event.target.value.replace(/[^0-9]/g, '');
+	}
+
+	function handlePhoneKeyPress(event) {
+		if (!/[0-9]/.test(event.key)) {
+			event.preventDefault();
+		}
+	}
 </script>
 
 <section class="container page-section">
@@ -62,7 +72,15 @@
 
 			<div class="field">
 				<label for="telefon">No Telefon<span class="req">*</span></label>
-				<input id="telefon" name="telefon" type="tel" placeholder="Contoh: 01922322901" required />
+				<input 
+					id="telefon" 
+					name="telefon" 
+					type="tel" 
+					placeholder="Contoh: 01922322901" 
+					required 
+					on:input={handlePhoneInput}
+					on:keypress={handlePhoneKeyPress}
+				/>
 			</div>
 
 			<div class="field">

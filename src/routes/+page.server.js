@@ -9,7 +9,8 @@ export async function load() {
 		{ data: seasonCategories },
 		{ data: packageTypes },
 		{ data: destinations },
-		{ data: outboundDates }
+		{ data: outboundDates },
+		{ data: salesConsultants }
 	] = await Promise.all([
 		supabaseAdmin.from('branches').select('id, name, whatsapp_number').eq('is_active', true).order('name'),
 		supabaseAdmin.from('umrah_seasons').select('id, name').eq('is_active', true).order('name'),
@@ -19,8 +20,9 @@ export async function load() {
 			.eq('is_active', true)
 			.eq('umrah_categories.is_active', true),
 		supabaseAdmin.from('package_types').select('id, name').order('name'),
-		supabaseAdmin.from('destinations').select('id, name').order('name'),
-		supabaseAdmin.from('outbound_dates').select('id, destination, date_range').order('destination')
+		supabaseAdmin.from('destinations').select('id, name, sales_consultant_id').order('name'),
+		supabaseAdmin.from('outbound_dates').select('id, destination_id, start_date, end_date').order('destination_id'),
+		supabaseAdmin.from('sales_consultant').select('id, name, whatsapp_number')
 	]);
 
 	const categoriesBySeason = new Map();
@@ -33,9 +35,18 @@ export async function load() {
 	// Mapping destinasi -> senarai tarikh
 	const dateRangesByDestination = new Map();
 	for (const od of outboundDates ?? []) {
-		const list = dateRangesByDestination.get(od.destination) ?? [];
-		if (od.date_range) list.push({ id: od.id, date_range: od.date_range });
-		dateRangesByDestination.set(od.destination, list);
+		const list = dateRangesByDestination.get(od.destination_id) ?? [];
+		if (od.start_date && od.end_date) {
+			const dateRange = `${od.start_date} - ${od.end_date}`;
+			list.push({ id: od.id, date_range: dateRange });
+		}
+		dateRangesByDestination.set(od.destination_id, list);
+	}
+
+	// Mapping sales consultant
+	const salesConsultantMap = new Map();
+	for (const sc of salesConsultants ?? []) {
+		salesConsultantMap.set(sc.id, { name: sc.name, whatsapp_number: sc.whatsapp_number });
 	}
 
 	return {
@@ -49,7 +60,8 @@ export async function load() {
 		destinations: (destinations ?? []).map((d) => ({
 			id: d.id,
 			name: d.name,
-			dates: dateRangesByDestination.get(d.id) ?? []
+			dates: dateRangesByDestination.get(d.id) ?? [],
+			sales_consultant: salesConsultantMap.get(d.sales_consultant_id)
 		}))
 	};
 }
@@ -85,8 +97,20 @@ export const actions = {
 			if (!tarikh) return { success: false, error: 'Sila pilih Tarikh Pelancongan.' };
 		}
 
-		const { data: branch } = await supabaseAdmin.from('branches').select('whatsapp_number').eq('id', cawangan).maybeSingle();
-		const adminWa = branch?.whatsapp_number ?? '';
+		let adminWa = '';
+		
+		if (isUmrah) {
+			// Untuk paket Umrah, gunakan nomor WhatsApp branch
+			const { data: branch } = await supabaseAdmin.from('branches').select('whatsapp_number').eq('id', cawangan).maybeSingle();
+			adminWa = branch?.whatsapp_number ?? '';
+		} else {
+			// Untuk paket outbound, gunakan nomor WhatsApp sales consultant destinasi
+			const { data: destData } = await supabaseAdmin.from('destinations').select('sales_consultant_id').eq('id', pelancongan).maybeSingle();
+			if (destData?.sales_consultant_id) {
+				const { data: consultantData } = await supabaseAdmin.from('sales_consultant').select('whatsapp_number').eq('id', destData.sales_consultant_id).maybeSingle();
+				adminWa = consultantData?.whatsapp_number ?? '';
+			}
+		}
 
 		await supabaseAdmin.from('leads').insert({
 			title: gelaran,
@@ -103,15 +127,30 @@ export const actions = {
 		// Ambil nama destinasi dan tarikh untuk pesan WhatsApp
 		let destinationName = '';
 		let tourDateRange = '';
+		let seasonName = '';
+		let categoryName = '';
+		
 		if (!isUmrah) {
 			const { data: destData } = await supabaseAdmin.from('destinations').select('name').eq('id', pelancongan).maybeSingle();
-			const { data: dateData } = await supabaseAdmin.from('outbound_dates').select('date_range').eq('id', tarikh).maybeSingle();
+			const { data: dateData } = await supabaseAdmin.from('outbound_dates').select('start_date, end_date').eq('id', tarikh).maybeSingle();
 			destinationName = destData?.name || '';
-			tourDateRange = dateData?.date_range || '';
+			if (dateData?.start_date && dateData?.end_date) {
+				tourDateRange = `${dateData.start_date} - ${dateData.end_date}`;
+			}
+		} else {
+			// Ambil nama season dan kategori untuk pesan WhatsApp
+			if (musim) {
+				const { data: seasonData } = await supabaseAdmin.from('umrah_seasons').select('name').eq('id', musim).maybeSingle();
+				seasonName = seasonData?.name || '';
+			}
+			if (kategori) {
+				const { data: categoryData } = await supabaseAdmin.from('umrah_categories').select('name').eq('id', kategori).maybeSingle();
+				categoryName = categoryData?.name || '';
+			}
 		}
 
 		const extra = isUmrah
-			? (musim ? `Musim: ${musim}${kategori ? `, Kategori: ${kategori}` : ''}` : '')
+			? (seasonName ? `Musim: ${seasonName}${categoryName ? `, Kategori: ${categoryName}` : ''}` : '')
 			: `Destinasi: ${destinationName}${tourDateRange ? `, Tarikh: ${tourDateRange}` : ''}`;
 		const msg = encodeURIComponent(`Assalamualaikum, saya ${gelaran} ${nama}. Ingin daftar ${packageTypeData.name}. No: ${telefon}. ${extra}`);
 		const phone = (adminWa || '').replace(/[^0-9]/g, '');
