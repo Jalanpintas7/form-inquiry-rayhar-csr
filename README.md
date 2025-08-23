@@ -1,38 +1,66 @@
-# sv
+# Form Inquiry Rayhar
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Aplikasi form inquiry untuk Rayhar Travel menggunakan SvelteKit dan Supabase.
 
-## Creating a project
+## Fitur
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Form inquiry untuk paket Umrah dan Pelancongan
+- Validasi form yang lengkap
+- Integrasi dengan database Supabase
+- **Pesan sukses yang informatif setelah pengiriman form**
+- **Tidak ada lagi direct link ke WhatsApp**
+- **Form otomatis reset setelah pengiriman berhasil**
 
-```sh
-# create a new project in the current directory
-npx sv create
+## Perubahan Terbaru
 
-# create a new project in my-app
-npx sv create my-app
-```
+### ✅ Fitur Baru
+- **Pesan Sukses**: Menampilkan pesan konfirmasi setelah form berhasil dikirim
+- **Pesan Error**: Menampilkan pesan error jika ada masalah dengan pengiriman
+- **Auto Reset Form**: Form otomatis dikosongkan setelah pengiriman berhasil
+- **Enhanced UX**: User experience yang lebih baik tanpa redirect ke WhatsApp
 
-## Developing
+### 🔄 Perubahan Sistem
+- **Server Action**: Form submission sekarang menggunakan SvelteKit form actions
+- **Database Only**: Data hanya disimpan ke database tanpa redirect eksternal
+- **Real-time Feedback**: Feedback langsung ke user tanpa reload halaman
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Cara Penggunaan
 
-```sh
+1. User mengisi form inquiry
+2. Klik tombol "HANTAR"
+3. Data disimpan ke database
+4. **Pesan sukses ditampilkan**
+5. **Form otomatis dikosongkan**
+6. User dapat mengisi form baru jika diperlukan
+
+## Teknologi
+
+- **Frontend**: SvelteKit 2.0
+- **Backend**: Supabase (PostgreSQL)
+- **Styling**: CSS Custom Properties
+- **Form Handling**: SvelteKit Form Actions
+
+## Struktur Database
+
+- `branches` - Daftar cabang
+- `package_types` - Jenis paket (Umrah/Pelancongan)
+- `umrah_seasons` - Musim Umrah
+- `umrah_categories` - Kategori Umrah
+- `destinations` - Destinasi pelancongan
+- `outbound_dates` - Tanggal pelancongan
+- `sales_consultant` - Konsultan penjualan
+- `leads` - Data inquiry yang masuk
+
+## Development
+
+```bash
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
 ```
 
-## Building
+## Production
 
-To create a production version of your app:
-
-```sh
+```bash
 npm run build
+npm run preview
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.

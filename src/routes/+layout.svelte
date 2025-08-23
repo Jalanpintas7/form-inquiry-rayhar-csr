@@ -1,6 +1,6 @@
 <script>
 	import favicon from '$lib/assets/favicon.svg';
-	import brandLogo from '$lib/assets/logo.png';
+	import brandLogo from '$lib/assets/logorayharsvg.svg';
 
 	let { children } = $props();
 </script>
@@ -26,7 +26,7 @@
 	<footer class="app-footer">
 		<div class="footer-inner">
 			<div class="container">
-				<small>Hak Cipta © 2025</small>
+				<small>Hak Cipta © 2025 Rayhar Hak Cipta Terpelihara.</small>
 			</div>
 		</div>
 	</footer>
@@ -43,10 +43,10 @@
 	}
 
 	:root {
-		--primary-600: #6D226A;
-		--primary-700: #6D226A;
-		--primary-800: #6D226A;
-		--ring: 0 0 0 4px rgba(109, 34, 106, 0.18);
+		--primary-600: #942392;
+		--primary-700: #942392;
+		--primary-800: #942392;
+		--ring: 0 0 0 4px rgba(148, 35, 146, 0.18);
 		--card-bg: #ffffff;
 		--border: #e5e7eb;
 		--header-total-height: 72px;
@@ -95,7 +95,11 @@
 		flex: 1 0 auto;
 	}
 
-	.app-footer { color: #6b7280; margin-top: auto; }
+	.app-footer { 
+		color: #6b7280; 
+		margin-top: auto; 
+		text-align: center;
+	}
 
 	.footer-inner {
 		padding: 16px 0;

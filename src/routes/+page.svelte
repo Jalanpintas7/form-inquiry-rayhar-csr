@@ -1,15 +1,40 @@
 <script>
+	import { enhance } from '$app/forms';
+	import Dropdown from '$lib/components/Dropdown.svelte';
+	
 	let { data, form } = $props();
 	const branches = data?.branches ?? [];
 	const seasons = data?.seasons ?? [];
 	const packageTypes = data?.packageTypes ?? [];
 	const destinations = data?.destinations ?? [];
+	const salesConsultants = data?.salesConsultants ?? [];
 
 	let selectedSeason = $state('');
 	let selectedCategory = $state('');
 	let selectedPackage = $state('');
 	let selectedDestination = $state('');
 	let selectedDate = $state('');
+	let selectedSalesConsultant = $state('');
+	let showSuccessMessage = $state(false);
+	let showErrorMessage = $state(false);
+	let messageText = $state('');
+
+	// Convert data untuk dropdown
+	const gelaranOptions = $derived([
+		{ value: 'Cik', label: 'Cik' },
+		{ value: 'Encik', label: 'Encik' },
+		{ value: 'Puan', label: 'Puan' },
+		{ value: 'Tuan', label: 'Tuan' },
+		{ value: 'Datin', label: 'Datin' },
+		{ value: 'Dato', label: 'Dato' }
+	]);
+
+	const cawanganOptions = $derived(branches.map(b => ({ value: b.id, label: b.name })));
+	const pakejOptions = $derived(packageTypes.map(p => ({ value: p.id, label: p.name })));
+	const salesConsultantOptions = $derived(salesConsultants.map(sc => ({ value: sc.id, label: sc.name })));
+	const musimOptions = $derived(seasons.map(s => ({ value: s.id, label: s.name })));
+	const destinationOptions = $derived(destinations.map(d => ({ value: d.id, label: d.name })));
+
 	$effect(() => {
 		if (!selectedSeason && form?.musim) selectedSeason = form.musim;
 	});
@@ -22,6 +47,19 @@
 	$effect(() => {
 		const cats = getCategories();
 		if (!cats.find((c) => c.id === selectedCategory)) selectedCategory = '';
+	});
+
+	// Handle form submission result
+	$effect(() => {
+		if (form?.success === true) {
+			showSuccessMessage = true;
+			messageText = form.message || 'Terima kasih! Maklumat anda telah berjaya dihantar.';
+			// Reset form
+			resetForm();
+		} else if (form?.success === false) {
+			showErrorMessage = true;
+			messageText = form.error || 'Ralat sistem. Sila cuba lagi.';
+		}
 	});
 
 	function getCategories() {
@@ -43,6 +81,26 @@
 			event.preventDefault();
 		}
 	}
+
+	function resetForm() {
+		selectedSeason = '';
+		selectedCategory = '';
+		selectedPackage = '';
+		selectedDestination = '';
+		selectedDate = '';
+		selectedSalesConsultant = '';
+		// Reset form elements
+		const formElement = document.querySelector('form');
+		if (formElement) {
+			formElement.reset();
+		}
+	}
+
+	function closeMessage() {
+		showSuccessMessage = false;
+		showErrorMessage = false;
+		messageText = '';
+	}
 </script>
 
 <section class="container page-section">
@@ -50,19 +108,56 @@
 		<h2>ISI MAKLUMAT ANDA</h2>
 	</div>
 
+	<!-- Success Message -->
+	{#if showSuccessMessage}
+		<div class="message success-message">
+			<div class="message-content">
+				<svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+					<polyline points="22,4 12,14.01 9,11.01"></polyline>
+				</svg>
+				<p>{messageText}</p>
+			</div>
+			<button class="close-btn" on:click={closeMessage}>×</button>
+		</div>
+	{/if}
+
+	<!-- Error Message -->
+	{#if showErrorMessage}
+		<div class="message error-message">
+			<div class="message-content">
+				<svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<circle cx="12" cy="12" r="10"></circle>
+					<line x1="15" y1="9" x2="9" y2="15"></line>
+					<line x1="9" y1="9" x2="15" y2="15"></line>
+				</svg>
+				<p>{messageText}</p>
+			</div>
+			<button class="close-btn" on:click={closeMessage}>×</button>
+		</div>
+	{/if}
+
 	<div class="card">
-		<form class="form-grid" method="POST">
+		<form class="form-grid" method="POST" use:enhance={() => {
+			return async ({ result }) => {
+				if (result.type === 'success') {
+					showSuccessMessage = true;
+					messageText = result.data?.message || 'Terima kasih! Maklumat anda telah berjaya dihantar.';
+					resetForm();
+				} else if (result.type === 'failure') {
+					showErrorMessage = true;
+					messageText = result.data?.error || 'Ralat sistem. Sila cuba lagi.';
+				}
+			};
+		}}>
 			<div class="field">
 				<label for="gelaran">Gelaran<span class="req">*</span></label>
-				<select id="gelaran" name="gelaran" required>
-					<option value="">Pilih Gelaran</option>
-					<option>Cik</option>
-					<option>Encik</option>
-					<option>Puan</option>
-					<option>Tuan</option>
-					<option>Datin</option>
-					<option>Dato</option>
-				</select>
+				<Dropdown 
+					options={gelaranOptions}
+					placeholder="Pilih Gelaran"
+					name="gelaran"
+					required={true}
+				/>
 			</div>
 
 			<div class="field">
@@ -85,66 +180,85 @@
 
 			<div class="field">
 				<label for="cawangan">Cawangan<span class="req">*</span></label>
-				<select id="cawangan" name="cawangan" required>
-					<option value="">Pilih Cawangan Anda</option>
-					{#each branches as b}
-						<option value={b.id}>{b.name}</option>
-					{/each}
-				</select>
+				<Dropdown 
+					options={cawanganOptions}
+					placeholder="Pilih Cawangan Anda"
+					name="cawangan"
+					required={true}
+					searchable={true}
+				/>
 			</div>
 
 			<div class="field">
 				<label for="pakej">Pakej<span class="req">*</span></label>
-				<select id="pakej" name="pakej" bind:value={selectedPackage} required>
-					<option value="">Pilih Pakej</option>
-					{#each packageTypes as p}
-						<option value={p.id}>{p.name}</option>
-					{/each}
-				</select>
+				<Dropdown 
+					options={pakejOptions}
+					placeholder="Pilih Pakej"
+					bind:value={selectedPackage}
+					name="pakej"
+					required={true}
+				/>
 			</div>
+
+			{#if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() !== 'umrah'}
+			<div class="field">
+				<label for="sales_consultant">Sales Consultant</label>
+				<Dropdown 
+					options={salesConsultantOptions}
+					placeholder="Pilih Sales Consultant"
+					bind:value={selectedSalesConsultant}
+					name="sales_consultant"
+				/>
+			</div>
+			{/if}
 
 			{#if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() === 'umrah'}
 			<div class="field">
 				<label for="musim">Musim Umrah<span class="req">*</span></label>
-				<select id="musim" name="musim" bind:value={selectedSeason} required>
-					<option value="">Pilih Pakej Umrah</option>
-					{#each seasons as s}
-						<option value={s.id}>{s.name}</option>
-					{/each}
-				</select>
+				<Dropdown 
+					options={musimOptions}
+					placeholder="Pilih Pakej Umrah"
+					bind:value={selectedSeason}
+					name="musim"
+					required={true}
+				/>
 			</div>
 
 			{#if selectedSeason && getCategories().length}
 			<div class="field">
 				<label for="kategori">Kategori Umrah<span class="req">*</span></label>
-				<select id="kategori" name="kategori" bind:value={selectedCategory} required>
-					<option value="">Pilih Kategori Umrah</option>
-					{#each getCategories() as c}
-						<option value={c.id}>{c.name}</option>
-					{/each}
-				</select>
+				<Dropdown 
+					options={getCategories().map(c => ({ value: c.id, label: c.name }))}
+					placeholder="Pilih Kategori Umrah"
+					bind:value={selectedCategory}
+					name="kategori"
+					required={true}
+				/>
 			</div>
 			{/if}
 			{:else if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() !== 'umrah'}
 			<div class="field">
 				<label for="pelancongan">Pelancongan<span class="req">*</span></label>
-				<select id="pelancongan" name="pelancongan" bind:value={selectedDestination} required>
-					<option value="">Pilih Pelancongan</option>
-					{#each destinations as d}
-						<option value={d.id}>{d.name}</option>
-					{/each}
-				</select>
+				<Dropdown 
+					options={destinationOptions}
+					placeholder="Pilih Pelancongan"
+					bind:value={selectedDestination}
+					name="pelancongan"
+					required={true}
+					searchable={true}
+				/>
 			</div>
 
 			{#if selectedDestination}
 			<div class="field">
 				<label for="tarikh">Tarikh Pelancongan<span class="req">*</span></label>
-				<select id="tarikh" name="tarikh" bind:value={selectedDate} required>
-					<option value="">Pilih Tarikh</option>
-					{#each getDatesForDestination() as d}
-						<option value={d.id}>{d.date_range}</option>
-					{/each}
-				</select>
+				<Dropdown 
+					options={getDatesForDestination().map(d => ({ value: d.id, label: d.date_range }))}
+					placeholder="Pilih Tarikh"
+					bind:value={selectedDate}
+					name="tarikh"
+					required={true}
+				/>
 			</div>
 			{/if}
 			{/if}
@@ -241,5 +355,73 @@
 
 	@media (max-width: 720px) {
 		.form-grid { grid-template-columns: 1fr; }
+	}
+
+	/* Message Styles */
+	.message {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 16px 20px;
+		border-radius: 12px;
+		margin-bottom: 24px;
+		max-width: 720px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.success-message {
+		background: #ecfdf5;
+		border: 1px solid #10b981;
+		color: #065f46;
+	}
+
+	.error-message {
+		background: #fef2f2;
+		border: 1px solid #ef4444;
+		color: #991b1b;
+	}
+
+	.message-content {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		flex: 1;
+	}
+
+	.message-content p {
+		margin: 0;
+		font-size: 14px;
+		font-weight: 500;
+	}
+
+	.success-icon {
+		width: 20px;
+		height: 20px;
+		color: #10b981;
+		flex-shrink: 0;
+	}
+
+	.error-icon {
+		width: 20px;
+		height: 20px;
+		color: #ef4444;
+		flex-shrink: 0;
+	}
+
+	.close-btn {
+		background: none;
+		border: none;
+		font-size: 20px;
+		color: inherit;
+		cursor: pointer;
+		padding: 4px;
+		border-radius: 4px;
+		transition: background-color 0.2s;
+		flex-shrink: 0;
+	}
+
+	.close-btn:hover {
+		background: rgba(0, 0, 0, 0.1);
 	}
 </style>

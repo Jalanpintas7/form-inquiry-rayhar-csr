@@ -1,11 +1,21 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="icon" type="image/svg+xml" href="%sveltekit.assets%/favicon.svg" />
-		<link rel="icon" type="image/png" href="%sveltekit.assets%/favicon.png" />
+		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+		<meta name="viewport" content="width=device-width" />
 		%sveltekit.head%
+		<style>
+			:root {
+				--primary-50: #f3e8ff;
+				--primary-600: #9333ea;
+				--primary-700: #7c3aed;
+				--primary-800: #6b21a8;
+				--border: #d1d5db;
+				--card-bg: #ffffff;
+				--ring: 0 0 0 3px rgba(147, 51, 234, 0.1);
+			}
+		</style>
 	</head>
 	<body data-sveltekit-preload-data="hover">
 		<div style="display: contents">%sveltekit.body%</div>
