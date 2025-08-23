@@ -103,42 +103,42 @@
 	}
 </script>
 
-<section class="container page-section">
-	<div class="page-title">
-		<h2>ISI MAKLUMAT ANDA</h2>
+<section class="pt-10">
+	<div class="text-center mb-5">
+		<h2 class="m-0 text-3xl font-bold tracking-wide">ISI MAKLUMAT ANDA</h2>
 	</div>
 
 	<!-- Success Message -->
 	{#if showSuccessMessage}
-		<div class="message success-message">
-			<div class="message-content">
-				<svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		<div class="flex items-center justify-between p-4 rounded-xl mb-6 max-w-[720px] mx-auto bg-green-50 border border-green-500 text-green-800">
+			<div class="flex items-center gap-3 flex-1">
+				<svg class="w-5 h-5 text-green-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
 					<polyline points="22,4 12,14.01 9,11.01"></polyline>
 				</svg>
-				<p>{messageText}</p>
+				<p class="m-0 text-sm font-medium">{messageText}</p>
 			</div>
-			<button class="close-btn" on:click={closeMessage}>×</button>
+			<button class="bg-transparent border-none text-xl text-inherit cursor-pointer p-1 rounded transition-colors hover:bg-black/10 flex-shrink-0" on:click={closeMessage}>×</button>
 		</div>
 	{/if}
 
 	<!-- Error Message -->
 	{#if showErrorMessage}
-		<div class="message error-message">
-			<div class="message-content">
-				<svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+		<div class="flex items-center justify-between p-4 rounded-xl mb-6 max-w-[720px] mx-auto bg-red-50 border border-red-500 text-red-800">
+			<div class="flex items-center gap-3 flex-1">
+				<svg class="w-5 h-5 text-red-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 					<circle cx="12" cy="12" r="10"></circle>
 					<line x1="15" y1="9" x2="9" y2="15"></line>
 					<line x1="9" y1="9" x2="15" y2="15"></line>
 				</svg>
-				<p>{messageText}</p>
+				<p class="m-0 text-sm font-medium">{messageText}</p>
 			</div>
-			<button class="close-btn" on:click={closeMessage}>×</button>
+			<button class="bg-transparent border-none text-xl text-inherit cursor-pointer p-1 rounded transition-colors hover:bg-black/10 flex-shrink-0" on:click={closeMessage}>×</button>
 		</div>
 	{/if}
 
-	<div class="card">
-		<form class="form-grid" method="POST" use:enhance={() => {
+	<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-7 max-w-[720px] mx-auto">
+		<form class="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-4" method="POST" use:enhance={() => {
 			return async ({ result }) => {
 				if (result.type === 'success') {
 					showSuccessMessage = true;
@@ -150,8 +150,8 @@
 				}
 			};
 		}}>
-			<div class="field">
-				<label for="gelaran">Gelaran<span class="req">*</span></label>
+			<div class="flex flex-col gap-2">
+				<label for="gelaran" class="text-sm font-semibold text-gray-700">Gelaran<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={gelaranOptions}
 					placeholder="Pilih Gelaran"
@@ -160,13 +160,13 @@
 				/>
 			</div>
 
-			<div class="field">
-				<label for="nama">Nama<span class="req">*</span></label>
-				<input id="nama" name="nama" type="text" placeholder="Nama Penuh" required />
+			<div class="flex flex-col gap-2">
+				<label for="nama" class="text-sm font-semibold text-gray-700">Nama<span class="text-red-500 ml-1">*</span></label>
+				<input id="nama" name="nama" type="text" placeholder="Nama Penuh" required class="h-11 rounded-lg border border-gray-200 px-3 text-sm bg-white outline-none transition-all duration-120 focus:border-[#942392] focus:shadow-[0_0_0_3px_rgba(148,35,146,0.18)]" />
 			</div>
 
-			<div class="field">
-				<label for="telefon">No Telefon<span class="req">*</span></label>
+			<div class="flex flex-col gap-2">
+				<label for="telefon" class="text-sm font-semibold text-gray-700">No Telefon<span class="text-red-500 ml-1">*</span></label>
 				<input 
 					id="telefon" 
 					name="telefon" 
@@ -175,11 +175,12 @@
 					required 
 					on:input={handlePhoneInput}
 					on:keypress={handlePhoneKeyPress}
+					class="h-11 rounded-lg border border-gray-200 px-3 text-sm bg-white outline-none transition-all duration-120 focus:border-[#942392] focus:shadow-[0_0_0_3px_rgba(148,35,146,0.18)]"
 				/>
 			</div>
 
-			<div class="field">
-				<label for="cawangan">Cawangan<span class="req">*</span></label>
+			<div class="flex flex-col gap-2">
+				<label for="cawangan" class="text-sm font-semibold text-gray-700">Cawangan<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={cawanganOptions}
 					placeholder="Pilih Cawangan Anda"
@@ -189,8 +190,8 @@
 				/>
 			</div>
 
-			<div class="field">
-				<label for="pakej">Pakej<span class="req">*</span></label>
+			<div class="flex flex-col gap-2">
+				<label for="pakej" class="text-sm font-semibold text-gray-700">Pakej<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={pakejOptions}
 					placeholder="Pilih Pakej"
@@ -201,8 +202,8 @@
 			</div>
 
 			{#if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() !== 'umrah'}
-			<div class="field">
-				<label for="sales_consultant">Sales Consultant</label>
+			<div class="flex flex-col gap-2">
+				<label for="sales_consultant" class="text-sm font-semibold text-gray-700">Sales Consultant</label>
 				<Dropdown 
 					options={salesConsultantOptions}
 					placeholder="Pilih Sales Consultant"
@@ -213,8 +214,8 @@
 			{/if}
 
 			{#if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() === 'umrah'}
-			<div class="field">
-				<label for="musim">Musim Umrah<span class="req">*</span></label>
+			<div class="flex flex-col gap-2">
+				<label for="musim" class="text-sm font-semibold text-gray-700">Musim Umrah<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={musimOptions}
 					placeholder="Pilih Pakej Umrah"
@@ -225,8 +226,8 @@
 			</div>
 
 			{#if selectedSeason && getCategories().length}
-			<div class="field">
-				<label for="kategori">Kategori Umrah<span class="req">*</span></label>
+			<div class="flex flex-col gap-2">
+				<label for="kategori" class="text-sm font-semibold text-gray-700">Kategori Umrah<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={getCategories().map(c => ({ value: c.id, label: c.name }))}
 					placeholder="Pilih Kategori Umrah"
@@ -237,8 +238,8 @@
 			</div>
 			{/if}
 			{:else if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() !== 'umrah'}
-			<div class="field">
-				<label for="pelancongan">Pelancongan<span class="req">*</span></label>
+			<div class="flex flex-col gap-2">
+				<label for="pelancongan" class="text-sm font-semibold text-gray-700">Pelancongan<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={destinationOptions}
 					placeholder="Pilih Pelancongan"
@@ -250,8 +251,8 @@
 			</div>
 
 			{#if selectedDestination}
-			<div class="field">
-				<label for="tarikh">Tarikh Pelancongan<span class="req">*</span></label>
+			<div class="flex flex-col gap-2">
+				<label for="tarikh" class="text-sm font-semibold text-gray-700">Tarikh Pelancongan<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={getDatesForDestination().map(d => ({ value: d.id, label: d.date_range }))}
 					placeholder="Pilih Tarikh"
@@ -263,165 +264,9 @@
 			{/if}
 			{/if}
 
-			<div class="actions">
-				<button type="submit" class="btn-primary">HANTAR</button>
+			<div class="col-span-2 mt-2">
+				<button type="submit" class="w-full h-[46px] border-none rounded-lg text-white font-semibold tracking-wide bg-gradient-to-r from-[#942392] to-[#942392] shadow-lg shadow-purple-900/25 cursor-pointer hover:brightness-105 transition-all">HANTAR</button>
 			</div>
 		</form>
 	</div>
 </section>
-
-<style>
-	.page-section {
-		padding: 40px 0 0;
-	}
-
-	.page-title {
-		text-align: center;
-		margin-bottom: 20px;
-	}
-
-	.page-title h2 {
-		margin: 0;
-		font-size: 28px;
-		font-weight: 700;
-		letter-spacing: 0.4px;
-	}
-
-	.card {
-		background: var(--card-bg);
-		border: 1px solid var(--border);
-		border-radius: 14px;
-		box-shadow: 0 10px 24px rgba(17, 24, 39, 0.06);
-		padding: 28px;
-		max-width: 720px;
-		margin: 0 auto;
-	}
-
-	.form-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 16px 20px;
-	}
-
-	.field {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-	}
-
-	label {
-		font-size: 13px;
-		font-weight: 600;
-		color: #374151;
-	}
-
-	.req { color: #ef4444; margin-left: 4px; }
-
-	input, select {
-		height: 44px;
-		border-radius: 10px;
-		border: 1px solid var(--border);
-		padding: 0 12px;
-		font-size: 14px;
-		background: #fff;
-		outline: none;
-		transition: box-shadow 120ms ease, border-color 120ms ease;
-	}
-
-	input:focus, select:focus {
-		border-color: var(--primary-600);
-		box-shadow: var(--ring);
-	}
-
-	.actions {
-		grid-column: 1 / -1;
-		margin-top: 8px;
-	}
-
-	.btn-primary {
-		width: 100%;
-		height: 46px;
-		border: none;
-		border-radius: 10px;
-		color: #fff;
-		font-weight: 600;
-		letter-spacing: 0.6px;
-		background: linear-gradient(90deg, var(--primary-800), var(--primary-600));
-		box-shadow: 0 6px 14px rgba(123, 31, 162, 0.25);
-		cursor: pointer;
-	}
-
-	.btn-primary:hover { filter: brightness(1.02); }
-
-	@media (max-width: 720px) {
-		.form-grid { grid-template-columns: 1fr; }
-	}
-
-	/* Message Styles */
-	.message {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: 16px 20px;
-		border-radius: 12px;
-		margin-bottom: 24px;
-		max-width: 720px;
-		margin-left: auto;
-		margin-right: auto;
-	}
-
-	.success-message {
-		background: #ecfdf5;
-		border: 1px solid #10b981;
-		color: #065f46;
-	}
-
-	.error-message {
-		background: #fef2f2;
-		border: 1px solid #ef4444;
-		color: #991b1b;
-	}
-
-	.message-content {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		flex: 1;
-	}
-
-	.message-content p {
-		margin: 0;
-		font-size: 14px;
-		font-weight: 500;
-	}
-
-	.success-icon {
-		width: 20px;
-		height: 20px;
-		color: #10b981;
-		flex-shrink: 0;
-	}
-
-	.error-icon {
-		width: 20px;
-		height: 20px;
-		color: #ef4444;
-		flex-shrink: 0;
-	}
-
-	.close-btn {
-		background: none;
-		border: none;
-		font-size: 20px;
-		color: inherit;
-		cursor: pointer;
-		padding: 4px;
-		border-radius: 4px;
-		transition: background-color 0.2s;
-		flex-shrink: 0;
-	}
-
-	.close-btn:hover {
-		background: rgba(0, 0, 0, 0.1);
-	}
-</style>

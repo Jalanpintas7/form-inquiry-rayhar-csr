@@ -33,45 +33,45 @@
 	<title>Dropdown Demo</title>
 </svelte:head>
 
-<div class="demo-container">
-	<h1>Demo Komponen Dropdown</h1>
-	<p>Komponen dropdown yang menampilkan ke bawah dengan jarak yang tepat dari border kanan</p>
+<div class="max-w-[800px] mx-auto p-10 font-sans">
+	<h1 class="text-center text-gray-800 mb-2">Demo Komponen Dropdown</h1>
+	<p class="text-center text-gray-600 mb-10">Komponen dropdown yang menampilkan ke bawah dengan jarak yang tepat dari border kanan</p>
 	
-	<div class="demo-section">
-		<h2>Dropdown 1 - Pilihan Umum</h2>
+	<div class="mb-10 p-6 border border-gray-200 rounded-xl bg-gray-50">
+		<h2 class="m-0 mb-4 text-gray-700 text-lg">Dropdown 1 - Pilihan Umum</h2>
 		<Dropdown 
 			options={options1}
 			placeholder="Pilih opsi"
 			bind:value={selectedValue1}
 			name="demo1"
 		/>
-		<p>Nilai yang dipilih: <strong>{selectedValue1 || 'Belum ada pilihan'}</strong></p>
+		<p class="mt-4 mb-0 text-gray-600 text-sm">Nilai yang dipilih: <strong class="text-green-600">{selectedValue1 || 'Belum ada pilihan'}</strong></p>
 	</div>
 	
-	<div class="demo-section">
-		<h2>Dropdown 2 - Pilihan Warna</h2>
+	<div class="mb-10 p-6 border border-gray-200 rounded-xl bg-gray-50">
+		<h2 class="m-0 mb-4 text-gray-700 text-lg">Dropdown 2 - Pilihan Warna</h2>
 		<Dropdown 
 			options={options2}
 			placeholder="Pilih warna"
 			bind:value={selectedValue2}
 			name="demo2"
 		/>
-		<p>Nilai yang dipilih: <strong>{selectedValue2 || 'Belum ada pilihan'}</strong></p>
+		<p class="mt-4 mb-0 text-gray-600 text-sm">Nilai yang dipilih: <strong class="text-green-600">{selectedValue2 || 'Belum ada pilihan'}</strong></p>
 	</div>
 	
-	<div class="demo-section">
-		<h2>Dropdown 3 - Pilihan Ukuran</h2>
+	<div class="mb-10 p-6 border border-gray-200 rounded-xl bg-gray-50">
+		<h2 class="m-0 mb-4 text-gray-700 text-lg">Dropdown 3 - Pilihan Ukuran</h2>
 		<Dropdown 
 			options={options3}
 			placeholder="Pilih ukuran"
 			bind:value={selectedValue3}
 			name="demo3"
 		/>
-		<p>Nilai yang dipilih: <strong>{selectedValue3 || 'Belum ada pilihan'}</strong></p>
+		<p class="mt-4 mb-0 text-gray-600 text-sm">Nilai yang dipilih: <strong class="text-green-600">{selectedValue3 || 'Belum ada pilihan'}</strong></p>
 	</div>
 	
-	<div class="demo-section">
-		<h2>Dropdown Required</h2>
+	<div class="mb-10 p-6 border border-gray-200 rounded-xl bg-gray-50">
+		<h2 class="m-0 mb-4 text-gray-700 text-lg">Dropdown Required</h2>
 		<Dropdown 
 			options={options1}
 			placeholder="Pilih opsi (wajib)"
@@ -80,8 +80,8 @@
 		/>
 	</div>
 	
-	<div class="demo-section">
-		<h2>Dropdown Disabled</h2>
+	<div class="mb-10 p-6 border border-gray-200 rounded-xl bg-gray-50">
+		<h2 class="m-0 mb-4 text-gray-700 text-lg">Dropdown Disabled</h2>
 		<Dropdown 
 			options={options1}
 			placeholder="Dropdown dinonaktifkan"
@@ -89,50 +89,4 @@
 			disabled={true}
 		/>
 	</div>
-</div>
-
-<style>
-	.demo-container {
-		max-width: 800px;
-		margin: 0 auto;
-		padding: 40px 20px;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-	}
-	
-	h1 {
-		text-align: center;
-		color: #1f2937;
-		margin-bottom: 10px;
-	}
-	
-	p {
-		text-align: center;
-		color: #6b7280;
-		margin-bottom: 40px;
-	}
-	
-	.demo-section {
-		margin-bottom: 40px;
-		padding: 24px;
-		border: 1px solid #e5e7eb;
-		border-radius: 12px;
-		background: #fafafa;
-	}
-	
-	h2 {
-		margin: 0 0 16px 0;
-		color: #374151;
-		font-size: 18px;
-	}
-	
-	p {
-		text-align: left;
-		margin: 16px 0 0 0;
-		color: #6b7280;
-		font-size: 14px;
-	}
-	
-	strong {
-		color: #059669;
-	}
-</style> 
+</div> 

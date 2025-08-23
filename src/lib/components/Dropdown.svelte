@@ -106,13 +106,13 @@
 
 <svelte:window on:click={handleClickOutside} />
 
-<div class="dropdown-container" class:open={isOpen}>
+<div class="dropdown-container relative w-full" class:open={isOpen}>
 	{#if searchable}
 		<!-- Searchable dropdown dengan input search di trigger -->
-		<div class="dropdown-trigger searchable" on:click={handleSearchClick}>
+		<div class="dropdown-trigger searchable flex items-center justify-between h-11 rounded-lg border border-gray-200 px-3 text-sm bg-white cursor-default" on:click={handleSearchClick}>
 			<input
 				type="text"
-				class="search-input"
+				class="search-input flex-1 h-full border-none outline-none text-sm px-0 bg-transparent text-gray-700 placeholder:text-gray-400"
 				placeholder={placeholder}
 				bind:value={searchQuery}
 				on:input={handleSearchInput}
@@ -120,7 +120,7 @@
 				on:click={handleSearchClick}
 			/>
 			<svg 
-				class="dropdown-icon" 
+				class="dropdown-icon w-4 h-4 text-gray-500 transition-transform duration-200 flex-shrink-0 cursor-pointer" 
 				class:rotated={isOpen}
 				viewBox="0 0 24 24" 
 				fill="none" 
@@ -133,12 +133,12 @@
 		</div>
 	{:else}
 		<!-- Regular dropdown tanpa search -->
-		<div class="dropdown-trigger" on:click={toggleDropdown}>
-			<span class="dropdown-value">
+		<div class="dropdown-trigger flex items-center justify-between h-11 rounded-lg border border-gray-200 px-3 text-sm bg-white cursor-pointer transition-all duration-120 hover:border-[#942392] focus-within:border-[#942392] focus-within:shadow-[0_0_0_3px_rgba(148,35,146,0.18)]" on:click={toggleDropdown}>
+			<span class="dropdown-value text-gray-700">
 				{selectedOption ? selectedOption.label : placeholder}
 			</span>
 			<svg 
-				class="dropdown-icon" 
+				class="dropdown-icon w-4 h-4 text-gray-500 transition-transform duration-200 flex-shrink-0" 
 				class:rotated={isOpen}
 				viewBox="0 0 24 24" 
 				fill="none" 
@@ -151,11 +151,11 @@
 	{/if}
 	
 	{#if isOpen}
-		<div class="dropdown-menu">
+		<div class="dropdown-menu absolute top-[calc(100%+4px)] left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-[1000] max-h-[250px] overflow-y-auto mr-2 right-2">
 			{#if filteredOptions.length > 0}
 				{#each filteredOptions as option}
 					<div 
-						class="dropdown-item" 
+						class="dropdown-item px-4 py-3 cursor-pointer transition-colors duration-150 border-b border-gray-100 last:border-b-0 hover:bg-gray-50" 
 						class:selected={option.value === value}
 						on:click={() => selectOption(option)}
 					>
@@ -163,13 +163,13 @@
 					</div>
 				{/each}
 			{:else if searchable && searchQuery}
-				<div class="no-results">
+				<div class="no-results px-4 py-4 text-center text-gray-500 text-sm italic">
 					Tiada hasil untuk "{searchQuery}"
 				</div>
 			{:else if !searchable}
 				{#each options as option}
 					<div 
-						class="dropdown-item" 
+						class="dropdown-item px-4 py-3 cursor-pointer transition-colors duration-150 border-b border-gray-100 last:border-b-0 hover:bg-gray-50" 
 						class:selected={option.value === value}
 						on:click={() => selectOption(option)}
 					>
@@ -202,7 +202,7 @@
 		justify-content: space-between;
 		height: 44px;
 		border-radius: 10px;
-		border: 1px solid var(--border, #d1d5db);
+		border: 1px solid #d1d5db;
 		padding: 0 12px;
 		font-size: 14px;
 		background: #fff;
@@ -216,12 +216,12 @@
 	}
 	
 	.dropdown-trigger:hover {
-		border-color: var(--primary-600, #9333ea);
+		border-color: #942392;
 	}
 	
 	.dropdown-trigger:focus-within {
-		border-color: var(--primary-600, #9333ea);
-		box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.1);
+		border-color: #942392;
+		box-shadow: 0 0 0 3px rgba(148, 35, 146, 0.18);
 	}
 	
 	.dropdown-value {
@@ -262,7 +262,7 @@
 		left: 0;
 		right: 0;
 		background: #fff;
-		border: 1px solid var(--border, #d1d5db);
+		border: 1px solid #d1d5db;
 		border-radius: 8px;
 		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 		z-index: 1000;
@@ -289,8 +289,8 @@
 	}
 	
 	.dropdown-item.selected {
-		background-color: var(--primary-50, #f3e8ff);
-		color: var(--primary-700, #7c3aed);
+		background-color: #f3e8ff;
+		color: #942392;
 		font-weight: 500;
 	}
 	
