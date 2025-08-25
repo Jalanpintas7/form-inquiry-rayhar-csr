@@ -48,22 +48,20 @@
 </svelte:head>
 
 <header class="sticky top-0 z-10 bg-[#942392] shadow-sm">
-	<div class="max-w-[1000px] mx-auto px-6 h-16 flex items-center justify-center">
-		<img src={brandLogo} alt="Logo" class="h-14 w-auto" />
+	<div class="max-w-[1000px] mx-auto px-4 sm:px-6 box-border h-14 sm:h-16 flex items-center justify-center">
+		<img src={brandLogo} alt="Logo" class="h-12 sm:h-14 w-auto" />
 	</div>
-	<div class="h-2 bg-gradient-to-r from-[#942392] to-[#942392] shadow-inner shadow-white/20"></div>
 </header>
 
-<main class="min-h-[calc(100svh-72px)] flex flex-col">
+<main class="min-h-[calc(100svh-56px)] sm:min-h-[calc(100svh-72px)] flex flex-col">
 	<div class="flex-1">
 		{@render children?.()}
 	</div>
 	<footer class="mt-auto text-center text-gray-600">
-		<div class="py-4 border-t border-gray-200 bg-gray-50">
-			<div class="max-w-[1000px] mx-auto px-6">
-				<small>Hak Cipta © 2025 Rayhar Hak Cipta Terpelihara.</small>
+		<div class="py-3 sm:py-4 bg-gray-50">
+			<div class="max-w-[1000px] mx-auto px-4 sm:px-6">
+				<small class="text-xs sm:text-sm">Hak Cipta © 2025 Rayhar Hak Cipta Terpelihara.</small>
 			</div>
 		</div>
 	</footer>
-	<div class="h-2 bg-gray-200"></div>
 </main>

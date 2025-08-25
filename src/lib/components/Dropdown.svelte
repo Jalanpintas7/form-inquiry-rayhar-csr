@@ -200,7 +200,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		height: 44px;
+		height: 40px;
 		border-radius: 10px;
 		border: 1px solid #d1d5db;
 		padding: 0 12px;
@@ -208,6 +208,12 @@
 		background: #fff;
 		cursor: pointer;
 		transition: box-shadow 120ms ease, border-color 120ms ease;
+	}
+	
+	@media (min-width: 640px) {
+		.dropdown-trigger {
+			height: 44px;
+		}
 	}
 	
 	.dropdown-trigger.searchable {
@@ -226,6 +232,13 @@
 	
 	.dropdown-value {
 		color: #374151;
+		font-size: 13px;
+	}
+	
+	@media (min-width: 640px) {
+		.dropdown-value {
+			font-size: 14px;
+		}
 	}
 	
 	.search-input {
@@ -233,10 +246,16 @@
 		height: 100%;
 		border: none;
 		outline: none;
-		font-size: 14px;
+		font-size: 13px;
 		padding: 0 12px;
 		background: transparent;
 		color: #374151;
+	}
+	
+	@media (min-width: 640px) {
+		.search-input {
+			font-size: 14px;
+		}
 	}
 	
 	.search-input::placeholder {
@@ -274,10 +293,18 @@
 	}
 	
 	.dropdown-item {
-		padding: 12px 16px;
+		padding: 10px 16px;
 		cursor: pointer;
 		transition: background-color 0.15s ease;
 		border-bottom: 1px solid #f3f4f6;
+		font-size: 13px;
+	}
+	
+	@media (min-width: 640px) {
+		.dropdown-item {
+			padding: 12px 16px;
+			font-size: 14px;
+		}
 	}
 	
 	.dropdown-item:last-child {
@@ -295,11 +322,18 @@
 	}
 	
 	.no-results {
-		padding: 16px;
+		padding: 14px 16px;
 		text-align: center;
 		color: #6b7280;
-		font-size: 14px;
+		font-size: 12px;
 		font-style: italic;
+	}
+	
+	@media (min-width: 640px) {
+		.no-results {
+			padding: 16px;
+			font-size: 14px;
+		}
 	}
 	
 	/* Custom scrollbar untuk dropdown */
