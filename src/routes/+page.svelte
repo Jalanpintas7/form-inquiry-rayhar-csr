@@ -134,7 +134,7 @@
 	{/if}
 
 	<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
-		<form class="grid grid-cols-1 gap-4 gap-y-4" method="POST" use:enhance={() => {
+		<form class="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-4" method="POST" use:enhance={() => {
 			return async ({ result }) => {
 				if (result.type === 'success') {
 					showSuccessMessage = true;
@@ -212,7 +212,7 @@
 			</div>
 
 			{#if selectedSeason && getCategories().length}
-			<div class="flex flex-col gap-1.5 sm:gap-2">
+			<div class="flex flex-col gap-1.5 sm:gap-2 md:col-span-2">
 				<label for="kategori" class="text-xs sm:text-sm font-semibold text-gray-700">Kategori Umrah<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={getCategories().map(c => ({ value: c.id, label: c.name }))}
@@ -237,7 +237,7 @@
 			</div>
 
 			{#if selectedDestination}
-			<div class="flex flex-col gap-1.5 sm:gap-2">
+			<div class="flex flex-col gap-1.5 sm:gap-2 md:col-span-2">
 				<label for="tarikh" class="text-xs sm:text-sm font-semibold text-gray-700">Tarikh Pelancongan<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={getDatesForDestination().map(d => ({ value: d.id, label: d.date_range }))}
@@ -250,7 +250,7 @@
 			{/if}
 			{/if}
 
-			<div class="mt-2">
+			<div class="mt-2 md:col-span-2">
 				<button type="submit" class="w-full h-[42px] sm:h-[46px] border-none rounded-lg text-white font-semibold tracking-wide bg-gradient-to-r from-[#942392] to-[#942392] shadow-lg shadow-purple-900/25 cursor-pointer hover:brightness-105 transition-all text-sm sm:text-base">HANTAR</button>
 			</div>
 		</form>
