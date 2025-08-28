@@ -30,7 +30,12 @@
 	const cawanganOptions = $derived(branches.map(b => ({ value: b.id, label: b.name })));
 	const pakejOptions = $derived(packageTypes.map(p => ({ value: p.id, label: p.name })));
 	const musimOptions = $derived(seasons.map(s => ({ value: s.id, label: s.name })));
-	const destinationOptions = $derived(destinations.map(d => ({ value: d.id, label: d.name })));
+	const destinationOptions = $derived(destinations.map(d => ({ 
+		value: d.id, 
+		label: d.name,
+		isAvailable: d.dates && d.dates.length > 0,
+		displayLabel: d.dates && d.dates.length > 0 ? d.name : `${d.name} (tidak tersedia)`
+	})));
 
 	$effect(() => {
 		if (!selectedSeason && form?.musim) selectedSeason = form.musim;
@@ -233,6 +238,7 @@
 					name="pelancongan"
 					required={true}
 					searchable={true}
+					showAvailability={true}
 				/>
 			</div>
 

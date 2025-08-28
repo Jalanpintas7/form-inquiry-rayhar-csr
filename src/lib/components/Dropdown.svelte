@@ -7,7 +7,8 @@
 	export let name = '';
 	export let required = false;
 	export let disabled = false;
-	export let searchable = false; // New prop untuk mengaktifkan search
+	export let searchable = false;
+	export let showAvailability = false;
 	
 	let isOpen = false;
 	let selectedOption = null;
@@ -18,7 +19,6 @@
 	
 	$: if (value && options.length) {
 		selectedOption = options.find(opt => opt.value === value);
-		// Update search query dengan label yang dipilih untuk searchable dropdown
 		if (searchable && selectedOption) {
 			searchQuery = selectedOption.label;
 		}
@@ -37,7 +37,6 @@
 		if (!disabled) {
 			isOpen = !isOpen;
 			if (isOpen && searchable) {
-				// Focus pada search input ketika dropdown dibuka
 				setTimeout(() => {
 					const searchInput = document.querySelector('.search-input');
 					if (searchInput) searchInput.focus();
@@ -47,16 +46,20 @@
 	}
 	
 	function selectOption(option) {
+		// Cek apakah opsi tersedia jika showAvailability aktif
+		if (showAvailability && option.isAvailable === false) {
+			return; // Jangan pilih opsi yang tidak tersedia
+		}
+		
 		selectedOption = option;
 		value = option.value;
-		searchQuery = option.label; // Set search query dengan label yang dipilih
+		searchQuery = option.label;
 		isOpen = false;
 		dispatch('change', { value: option.value, option });
 	}
 	
 	function closeDropdown() {
 		isOpen = false;
-		// Jangan reset search query jika sudah ada nilai yang dipilih
 		if (!selectedOption) {
 			searchQuery = '';
 		}
@@ -64,11 +67,9 @@
 	
 	function handleSearchInput(event) {
 		searchQuery = event.target.value;
-		// Buka dropdown otomatis ketika user mulai mengetik
 		if (!isOpen) {
 			isOpen = true;
 		}
-		// Clear selection jika user mengubah search query
 		if (selectedOption && searchQuery !== selectedOption.label) {
 			selectedOption = null;
 			value = '';
@@ -79,24 +80,25 @@
 		if (event.key === 'Escape') {
 			closeDropdown();
 		} else if (event.key === 'Enter' && filteredOptions.length === 1) {
-			// Auto-select jika hanya ada 1 hasil
 			selectOption(filteredOptions[0]);
 		}
 	}
 	
 	function handleSearchClick(event) {
-		// Mencegah dropdown tertutup ketika mengklik input search
-		event.stopPropagation();
+		// Buka dropdown jika belum terbuka
 		if (!isOpen) {
 			isOpen = true;
 		}
+		// Focus pada input
+		setTimeout(() => {
+			const searchInput = event.target;
+			if (searchInput) searchInput.focus();
+		}, 100);
 	}
 	
-	// Close dropdown when clicking outside
 	function handleClickOutside(event) {
 		if (!event.target.closest('.dropdown-container')) {
 			isOpen = false;
-			// Jangan reset search query jika sudah ada nilai yang dipilih
 			if (!selectedOption) {
 				searchQuery = '';
 			}
@@ -108,8 +110,7 @@
 
 <div class="dropdown-container relative w-full" class:open={isOpen}>
 	{#if searchable}
-		<!-- Searchable dropdown dengan input search di trigger -->
-		<div class="dropdown-trigger searchable flex items-center justify-between h-11 rounded-lg border border-gray-200 px-3 text-sm bg-white cursor-default" on:click={handleSearchClick}>
+		<div class="dropdown-trigger searchable flex items-center justify-between h-11 rounded-lg border border-gray-200 px-3 text-sm bg-white cursor-pointer transition-all duration-120 hover:border-[#942392] focus-within:border-[#942392] focus-within:shadow-[0_0_0_3px_rgba(148,35,146,0.18)]">
 			<input
 				type="text"
 				class="search-input flex-1 h-full border-none outline-none text-sm px-0 bg-transparent text-gray-700 placeholder:text-gray-400"
@@ -120,19 +121,17 @@
 				on:click={handleSearchClick}
 			/>
 			<svg 
-				class="dropdown-icon w-4 h-4 text-gray-500 transition-transform duration-200 flex-shrink-0 cursor-pointer" 
+				class="dropdown-icon w-4 h-4 text-gray-500 transition-transform duration-200 flex-shrink-0" 
 				class:rotated={isOpen}
 				viewBox="0 0 24 24" 
 				fill="none" 
 				stroke="currentColor" 
 				stroke-width="2"
-				on:click={toggleDropdown}
 			>
 				<polyline points="6,9 12,15 18,9"></polyline>
 			</svg>
 		</div>
 	{:else}
-		<!-- Regular dropdown tanpa search -->
 		<div class="dropdown-trigger flex items-center justify-between h-11 rounded-lg border border-gray-200 px-3 text-sm bg-white cursor-pointer transition-all duration-120 hover:border-[#942392] focus-within:border-[#942392] focus-within:shadow-[0_0_0_3px_rgba(148,35,146,0.18)]" on:click={toggleDropdown}>
 			<span class="dropdown-value text-gray-700">
 				{selectedOption ? selectedOption.label : placeholder}
@@ -155,11 +154,16 @@
 			{#if filteredOptions.length > 0}
 				{#each filteredOptions as option}
 					<div 
-						class="dropdown-item px-4 py-3 cursor-pointer transition-colors duration-150 border-b border-gray-100 last:border-b-0 hover:bg-gray-50" 
+						class="dropdown-item px-4 py-3 transition-colors duration-150 border-b border-gray-100 last:border-b-0" 
 						class:selected={option.value === value}
+						class:unavailable={showAvailability && option.isAvailable === false}
 						on:click={() => selectOption(option)}
 					>
-						{option.label}
+						{#if showAvailability && option.displayLabel}
+							{option.displayLabel}
+						{:else}
+							{option.label}
+						{/if}
 					</div>
 				{/each}
 			{:else if searchable && searchQuery}
@@ -169,18 +173,22 @@
 			{:else if !searchable}
 				{#each options as option}
 					<div 
-						class="dropdown-item px-4 py-3 cursor-pointer transition-colors duration-150 border-b border-gray-100 last:border-b-0 hover:bg-gray-50" 
+						class="dropdown-item px-4 py-3 transition-colors duration-150 border-b border-gray-100 last:border-b-0" 
 						class:selected={option.value === value}
+						class:unavailable={showAvailability && option.isAvailable === false}
 						on:click={() => selectOption(option)}
 					>
-						{option.label}
+						{#if showAvailability && option.displayLabel}
+							{option.displayLabel}
+						{:else}
+							{option.label}
+						{/if}
 					</div>
 				{/each}
 			{/if}
 		</div>
 	{/if}
 	
-	<!-- Hidden input for form submission -->
 	<input 
 		type="hidden" 
 		{name} 
@@ -218,7 +226,7 @@
 	
 	.dropdown-trigger.searchable {
 		padding: 0;
-		cursor: default;
+		cursor: pointer;
 	}
 	
 	.dropdown-trigger:hover {
@@ -287,7 +295,6 @@
 		z-index: 1000;
 		max-height: 250px;
 		overflow-y: auto;
-		/* Memberikan jarak dari border kanan */
 		margin-right: 8px;
 		right: 8px;
 	}
@@ -321,6 +328,16 @@
 		font-weight: 500;
 	}
 	
+	.dropdown-item.unavailable {
+		color: #9ca3af;
+		cursor: not-allowed;
+		background-color: #f9fafb;
+	}
+	
+	.dropdown-item.unavailable:hover {
+		background-color: #f9fafb;
+	}
+	
 	.no-results {
 		padding: 14px 16px;
 		text-align: center;
@@ -336,7 +353,6 @@
 		}
 	}
 	
-	/* Custom scrollbar untuk dropdown */
 	.dropdown-menu::-webkit-scrollbar {
 		width: 6px;
 	}
@@ -355,15 +371,13 @@
 		background: #a8a8a8;
 	}
 	
-	/* Responsive adjustments */
 	@media (max-width: 768px) {
 		.dropdown-menu {
-			right: 12px; /* Memberikan jarak dari border kanan pada mobile */
-			left: 8px; /* Memberikan jarak dari border kiri pada mobile */
+			right: 12px;
+			left: 8px;
 		}
 	}
 	
-	/* Memastikan dropdown tidak terlalu dekat dengan border kanan pada semua ukuran */
 	@media (min-width: 769px) {
 		.dropdown-menu {
 			right: 12px;
