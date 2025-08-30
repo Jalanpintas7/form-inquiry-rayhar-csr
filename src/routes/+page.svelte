@@ -202,8 +202,6 @@
 				/>
 			</div>
 
-
-
 			{#if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() === 'umrah'}
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="musim" class="text-xs sm:text-sm font-semibold text-gray-700">Musim Umrah<span class="text-red-500 ml-1">*</span></label>
@@ -228,7 +226,7 @@
 				/>
 			</div>
 			{/if}
-			{:else if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() !== 'umrah'}
+			{:else if selectedPackage && !['umrah', 'haji'].includes(data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase())}
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="pelancongan" class="text-xs sm:text-sm font-semibold text-gray-700">Pelancongan<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 

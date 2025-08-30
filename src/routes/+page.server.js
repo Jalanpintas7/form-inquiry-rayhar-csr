@@ -12,12 +12,11 @@ export async function load() {
 		{ data: outboundDates },
 		{ data: salesConsultants }
 	] = await Promise.all([
-		supabaseAdmin.from('branches').select('id, name, whatsapp_number').eq('is_active', true).order('name'),
-		supabaseAdmin.from('umrah_seasons').select('id, name').eq('is_active', true).order('name'),
+		supabaseAdmin.from('branches').select('id, name, whatsapp_number').order('name'),
+		supabaseAdmin.from('umrah_seasons').select('id, name').order('name'),
 		supabaseAdmin
 			.from('umrah_dates')
-			.select('umrah_season_id, umrah_category_id, umrah_categories!inner(id, name, is_active)')
-			.eq('is_active', true)
+			.select('umrah_season_id, umrah_category_id, umrah_categories!inner(id, name)')
 			.eq('umrah_categories.is_active', true),
 		supabaseAdmin.from('package_types').select('id, name').order('name'),
 		supabaseAdmin.from('destinations').select('id, name, sales_consultant_id').order('name'),
@@ -81,48 +80,59 @@ export const actions = {
 			const nama = form.get('nama')?.toString().trim();
 			const telefon = form.get('telefon')?.toString().trim();
 			const cawangan = form.get('cawangan')?.toString().trim();
-			const salesConsultant = form.get('sales_consultant')?.toString().trim();
 			const pakej = form.get('pakej')?.toString().trim();
 			const musim = form.get('musim')?.toString().trim();
 			const kategori = form.get('kategori')?.toString().trim();
 			const pelancongan = form.get('pelancongan')?.toString().trim();
 			const tarikh = form.get('tarikh')?.toString().trim();
 
-		// Cari package_type berdasarkan ID paket
-		const { data: packageTypeData } = await supabaseAdmin.from('package_types').select('id, name').eq('id', pakej).maybeSingle();
-		if (!packageTypeData) {
-			return { success: false, error: 'Pakej tidak sah.' };
-		}
+			// Cari package_type berdasarkan ID paket
+			const { data: packageTypeData } = await supabaseAdmin.from('package_types').select('id, name').eq('id', pakej).maybeSingle();
+			if (!packageTypeData) {
+				return { success: false, error: 'Pakej tidak sah.' };
+			}
 
-		const isUmrah = (packageTypeData.name || '').toLowerCase() === 'umrah';
-		if (!gelaran || !nama || !telefon || !cawangan) {
-			return { success: false, error: 'Sila lengkapkan medan wajib.' };
-		}
-		if (isUmrah) {
-			if (!musim) return { success: false, error: 'Sila pilih Musim Umrah.' };
-		} else {
-			if (!pelancongan) return { success: false, error: 'Sila pilih Pelancongan.' };
-			if (!tarikh) return { success: false, error: 'Sila pilih Tarikh Pelancongan.' };
-		}
+			const isUmrah = (packageTypeData.name || '').toLowerCase() === 'umrah';
+			const isHaji = (packageTypeData.name || '').toLowerCase() === 'haji';
+			
+			// Validasi field wajib
+			if (!gelaran || !nama || !telefon || !cawangan) {
+				return { success: false, error: 'Sila lengkapkan medan wajib.' };
+			}
+			
+			if (isUmrah) {
+				if (!musim) return { success: false, error: 'Sila pilih Musim Umrah.' };
+			} else if (!isHaji) {
+				// Untuk pakej selain Umrah dan Haji (outbound)
+				if (!pelancongan) return { success: false, error: 'Sila pilih Pelancongan.' };
+				if (!tarikh) return { success: false, error: 'Sila pilih Tarikh Pelancongan.' };
+			}
 
-		// Simpan data ke database
-		await supabaseAdmin.from('leads').insert({
-			title: gelaran,
-			full_name: nama,
-			phone: telefon,
-			branch_id: cawangan,
-			package_type_id: packageTypeData.id,
-			season_id: isUmrah ? musim : null,
-			category_id: isUmrah ? (kategori || null) : null,
-			destination_id: !isUmrah ? pelancongan : null,
-			outbound_date_id: !isUmrah ? tarikh : null
-		});
+			// Simpan data ke database
+			const { data: leadData, error: leadError } = await supabaseAdmin.from('leads').insert({
+				title: gelaran,
+				full_name: nama,
+				phone: telefon,
+				branch_id: cawangan,
+				package_type_id: packageTypeData.id,
+				season_id: isUmrah ? musim : null,
+				category_id: isUmrah ? (kategori || null) : null,
+				destination_id: (!isUmrah && !isHaji) ? pelancongan : null,
+				outbound_date_id: (!isUmrah && !isHaji) ? tarikh : null,
+				category: isUmrah ? 'umrah' : isHaji ? 'haji' : 'outbound'
+			}).select().single();
 
-		// Kembalikan pesan sukses
-		return { 
-			success: true, 
-			message: 'Terima kasih! Maklumat anda telah berjaya dihantar. Pasukan kami akan menghubungi anda tidak lama lagi.' 
-		};
+			if (leadError) {
+				console.error('Error inserting lead:', leadError);
+				return { success: false, error: 'Ralat semasa menyimpan data. Sila cuba lagi.' };
+			}
+
+			// Kembalikan pesan sukses
+			return { 
+				success: true, 
+				message: 'Terima kasih! Maklumat anda telah berjaya dihantar. Pasukan kami akan menghubungi anda tidak lama lagi.',
+				leadId: leadData.id
+			};
 
 		} catch (error) {
 			console.error('Error in form submission:', error);
