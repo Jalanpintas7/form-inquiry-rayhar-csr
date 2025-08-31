@@ -225,7 +225,7 @@
 	}
 	
 	.dropdown-trigger.searchable {
-		padding: 0;
+		padding: 0 12px;
 		cursor: pointer;
 	}
 	
@@ -255,7 +255,7 @@
 		border: none;
 		outline: none;
 		font-size: 13px;
-		padding: 0 12px;
+		padding: 0;
 		background: transparent;
 		color: #374151;
 	}

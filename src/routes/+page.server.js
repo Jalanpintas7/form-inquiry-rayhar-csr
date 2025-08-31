@@ -16,12 +16,11 @@ export async function load() {
 		supabaseAdmin.from('umrah_seasons').select('id, name').order('name'),
 		supabaseAdmin
 			.from('umrah_dates')
-			.select('umrah_season_id, umrah_category_id, umrah_categories!inner(id, name)')
-			.eq('umrah_categories.is_active', true),
+			.select('umrah_season_id, umrah_category_id, umrah_categories!inner(id, name)'),
 		supabaseAdmin.from('package_types').select('id, name').order('name'),
 		supabaseAdmin.from('destinations').select('id, name, sales_consultant_id').order('name'),
 		supabaseAdmin.from('outbound_dates').select('id, destination_id, start_date, end_date').order('destination_id'),
-		supabaseAdmin.from('sales_consultant').select('id, name, whatsapp_number').order('name')
+		supabaseAdmin.from('sales_consultant').select('id, name, sales_consultant_number, whatsapp_number').order('sales_consultant_number')
 	]);
 
 	const categoriesBySeason = new Map();
@@ -51,7 +50,7 @@ export async function load() {
 	// Mapping sales consultant
 	const salesConsultantMap = new Map();
 	for (const sc of salesConsultants ?? []) {
-		salesConsultantMap.set(sc.id, { name: sc.name, whatsapp_number: sc.whatsapp_number });
+		salesConsultantMap.set(sc.id, { name: sc.name, whatsapp_number: sc.whatsapp_number, sales_consultant_number: sc.sales_consultant_number });
 	}
 
 	return {
@@ -80,6 +79,7 @@ export const actions = {
 			const nama = form.get('nama')?.toString().trim();
 			const telefon = form.get('telefon')?.toString().trim();
 			const cawangan = form.get('cawangan')?.toString().trim();
+			const salesConsultant = form.get('sales_consultant')?.toString().trim();
 			const pakej = form.get('pakej')?.toString().trim();
 			const musim = form.get('musim')?.toString().trim();
 			const kategori = form.get('kategori')?.toString().trim();
@@ -96,7 +96,7 @@ export const actions = {
 			const isHaji = (packageTypeData.name || '').toLowerCase() === 'haji';
 			
 			// Validasi field wajib
-			if (!gelaran || !nama || !telefon || !cawangan) {
+			if (!gelaran || !nama || !telefon || !cawangan || !salesConsultant) {
 				return { success: false, error: 'Sila lengkapkan medan wajib.' };
 			}
 			
@@ -114,6 +114,7 @@ export const actions = {
 				full_name: nama,
 				phone: telefon,
 				branch_id: cawangan,
+				sales_consultant_id: salesConsultant,
 				package_type_id: packageTypeData.id,
 				season_id: isUmrah ? musim : null,
 				category_id: isUmrah ? (kategori || null) : null,

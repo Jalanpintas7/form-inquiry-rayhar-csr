@@ -4,6 +4,7 @@
 	
 	let { data, form } = $props();
 	const branches = data?.branches ?? [];
+	const salesConsultants = data?.salesConsultants ?? [];
 	const seasons = data?.seasons ?? [];
 	const packageTypes = data?.packageTypes ?? [];
 	const destinations = data?.destinations ?? [];
@@ -13,6 +14,7 @@
 	let selectedPackage = $state('');
 	let selectedDestination = $state('');
 	let selectedDate = $state('');
+	let selectedSalesConsultant = $state('');
 	let showSuccessMessage = $state(false);
 	let showErrorMessage = $state(false);
 	let messageText = $state('');
@@ -28,6 +30,10 @@
 	]);
 
 	const cawanganOptions = $derived(branches.map(b => ({ value: b.id, label: b.name })));
+	const salesConsultantOptions = $derived(salesConsultants.map(sc => ({ 
+		value: sc.id, 
+		label: `${sc.sales_consultant_number}. ${sc.name}` 
+	})));
 	const pakejOptions = $derived(packageTypes.map(p => ({ value: p.id, label: p.name })));
 	const musimOptions = $derived(seasons.map(s => ({ value: s.id, label: s.name })));
 	const destinationOptions = $derived(destinations.map(d => ({ 
@@ -45,6 +51,9 @@
 	});
 	$effect(() => {
 		if (!selectedPackage && form?.pakej) selectedPackage = form.pakej;
+	});
+	$effect(() => {
+		if (!selectedSalesConsultant && form?.sales_consultant) selectedSalesConsultant = form.sales_consultant;
 	});
 	$effect(() => {
 		const cats = getCategories();
@@ -66,12 +75,95 @@
 
 	function getCategories() {
 		const found = seasons.find((s) => s.id === selectedSeason);
-		return found?.categories ?? [];
+		const categories = found?.categories ?? [];
+		return categories;
 	}
 
 	function getDatesForDestination() {
 		const found = destinations.find((d) => d.id === selectedDestination);
 		return found?.dates ?? [];
+	}
+
+	function formatDateToMalay(dateString) {
+		// Mapping nama bulan dalam Bahasa Melayu
+		const monthNames = {
+			'Jan': 'Januari',
+			'Feb': 'Februari',
+			'Mac': 'Mac',
+			'Apr': 'April',
+			'Mei': 'Mei',
+			'Jun': 'Jun',
+			'Jul': 'Julai',
+			'Ogo': 'Ogos',
+			'Sep': 'September',
+			'Okt': 'Oktober',
+			'Nov': 'November',
+			'Dis': 'Disember'
+		};
+
+		// Array nama bulan singkat
+		const monthShort = ['Jan', 'Feb', 'Mac', 'Apr', 'Mei', 'Jun', 'Jul', 'Ogo', 'Sep', 'Okt', 'Nov', 'Dis'];
+
+		// Format: "2026-06-25 - 2026-02-06" (range tanggal)
+		if (dateString.includes(' - ')) {
+			const [startDate, endDate] = dateString.split(' - ');
+			
+			try {
+				// Parse start date
+				const start = new Date(startDate);
+				const startDay = start.getDate();
+				const startMonth = start.getMonth();
+				const startYear = start.getFullYear();
+				
+				// Parse end date
+				const end = new Date(endDate);
+				const endDay = end.getDate();
+				const endMonth = end.getMonth();
+				const endYear = end.getFullYear();
+				
+				if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+					const formattedStart = `${startDay} ${monthShort[startMonth]} ${startYear}`;
+					const formattedEnd = `${endDay} ${monthShort[endMonth]} ${endYear}`;
+					const formattedRange = `${formattedStart} - ${formattedEnd}`;
+					return formattedRange;
+				}
+			} catch (e) {
+				// Error handling tanpa console.log
+			}
+		}
+
+		// Format: "12 Ogo 2025" atau "12 Ogos 2025" (sudah dalam format yang benar)
+		if (dateString.includes(' ')) {
+			const parts = dateString.split(' ');
+			if (parts.length === 3) {
+				const day = parts[0];
+				const month = parts[1];
+				const year = parts[2];
+				
+				// Cek apakah ini format yang sudah benar
+				if (monthNames[month] || Object.values(monthNames).includes(month)) {
+					return dateString; // Sudah dalam format yang benar
+				}
+			}
+		}
+
+		// Format: "2025-08-12" atau "2025/08/12" (tanggal tunggal)
+		try {
+			const date = new Date(dateString);
+			if (!isNaN(date.getTime())) {
+				const day = date.getDate();
+				const month = date.getMonth();
+				const year = date.getFullYear();
+				
+				const formattedDate = `${day} ${monthShort[month]} ${year}`;
+				return formattedDate;
+			}
+		} catch (e) {
+			// Error handling tanpa console.log
+		}
+
+		// Jika tidak bisa di-parse, return string asli
+		return dateString;
 	}
 
 	function handlePhoneInput(event) {
@@ -90,6 +182,7 @@
 		selectedPackage = '';
 		selectedDestination = '';
 		selectedDate = '';
+		selectedSalesConsultant = '';
 		// Reset form elements
 		const formElement = document.querySelector('form');
 		if (formElement) {
@@ -192,6 +285,17 @@
 			</div>
 
 			<div class="flex flex-col gap-1.5 sm:gap-2">
+				<label for="sales_consultant" class="text-xs sm:text-sm font-semibold text-gray-700">Sales Consultant<span class="text-red-500 ml-1">*</span></label>
+				<Dropdown 
+					options={salesConsultantOptions}
+					placeholder="Pilih Sales Consultant"
+					bind:value={selectedSalesConsultant}
+					name="sales_consultant"
+					required={true}
+				/>
+			</div>
+
+			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="pakej" class="text-xs sm:text-sm font-semibold text-gray-700">Pakej<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
 					options={pakejOptions}
@@ -214,17 +318,25 @@
 				/>
 			</div>
 
-			{#if selectedSeason && getCategories().length}
-			<div class="flex flex-col gap-1.5 sm:gap-2 md:col-span-2">
-				<label for="kategori" class="text-xs sm:text-sm font-semibold text-gray-700">Kategori Umrah<span class="text-red-500 ml-1">*</span></label>
-				<Dropdown 
-					options={getCategories().map(c => ({ value: c.id, label: c.name }))}
-					placeholder="Pilih Kategori Umrah"
-					bind:value={selectedCategory}
-					name="kategori"
-					required={true}
-				/>
-			</div>
+			{#if selectedSeason}
+				{#if getCategories().length}
+				<div class="flex flex-col gap-1.5 sm:gap-2">
+					<label for="kategori" class="text-xs sm:text-sm font-semibold text-gray-700">Kategori Umrah<span class="text-red-500 ml-1">*</span></label>
+					<Dropdown 
+						options={getCategories().map(c => ({ value: c.id, label: c.name }))}
+						placeholder="Pilih Kategori Umrah"
+						bind:value={selectedCategory}
+						name="kategori"
+						required={true}
+					/>
+				</div>
+				{:else}
+				<div class="flex flex-col gap-1.5 sm:gap-2">
+					<div class="p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+						⚠️ Musim "{data.seasons.find(s => s.id === selectedSeason)?.name}" tidak memiliki kategori umrah yang tersedia. Sila pilih musim lain.
+					</div>
+				</div>
+				{/if}
 			{/if}
 			{:else if selectedPackage && !['umrah', 'haji'].includes(data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase())}
 			<div class="flex flex-col gap-1.5 sm:gap-2">
@@ -241,10 +353,13 @@
 			</div>
 
 			{#if selectedDestination}
-			<div class="flex flex-col gap-1.5 sm:gap-2 md:col-span-2">
+			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="tarikh" class="text-xs sm:text-sm font-semibold text-gray-700">Tarikh Pelancongan<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
-					options={getDatesForDestination().map(d => ({ value: d.id, label: d.date_range }))}
+					options={getDatesForDestination().map(d => ({ 
+						value: d.id, 
+						label: formatDateToMalay(d.date_range) 
+					}))}
 					placeholder="Pilih Tarikh"
 					bind:value={selectedDate}
 					name="tarikh"
