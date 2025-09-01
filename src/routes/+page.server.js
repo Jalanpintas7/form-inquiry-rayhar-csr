@@ -10,27 +10,33 @@ export async function load() {
 		{ data: packageTypes },
 		{ data: destinations },
 		{ data: outboundDates },
-		{ data: salesConsultants }
+		{ data: salesConsultants },
+		{ data: umrahCategories }
 	] = await Promise.all([
 		supabaseAdmin.from('branches').select('id, name, whatsapp_number').order('name'),
 		supabaseAdmin.from('umrah_seasons').select('id, name').order('name'),
 		supabaseAdmin
 			.from('umrah_dates')
-			.select('umrah_season_id, umrah_category_id, umrah_categories!inner(id, name)'),
+			.select('umrah_season_id, umrah_category_id'),
 		supabaseAdmin.from('package_types').select('id, name').order('name'),
-		supabaseAdmin.from('destinations').select('id, name, sales_consultant_id').order('name'),
+		supabaseAdmin.from('destinations').select('id, name').order('name'),
 		supabaseAdmin.from('outbound_dates').select('id, destination_id, start_date, end_date').order('destination_id'),
-		supabaseAdmin.from('sales_consultant').select('id, name, sales_consultant_number, whatsapp_number').order('sales_consultant_number')
+		supabaseAdmin.from('sales_consultant').select('id, name, sales_consultant_number, whatsapp_number').order('sales_consultant_number'),
+		supabaseAdmin.from('umrah_categories').select('id, name').order('name')
 	]);
 
 	const categoriesBySeason = new Map();
 	for (const row of umrahDates ?? []) {
 		const list = categoriesBySeason.get(row.umrah_season_id) ?? [];
-		if (row.umrah_categories) {
-			// Cek apakah kategori sudah ada untuk menghindari duplikasi
-			const existingCategory = list.find(cat => cat.id === row.umrah_categories.id);
-			if (!existingCategory) {
-				list.push({ id: row.umrah_categories.id, name: row.umrah_categories.name });
+		if (row.umrah_category_id) {
+			// Cari nama kategori dari data umrahCategories
+			const category = umrahCategories?.find(cat => cat.id === row.umrah_category_id);
+			if (category) {
+				// Cek apakah kategori sudah ada untuk menghindari duplikasi
+				const existingCategory = list.find(cat => cat.id === category.id);
+				if (!existingCategory) {
+					list.push({ id: category.id, name: category.name });
+				}
 			}
 		}
 		categoriesBySeason.set(row.umrah_season_id, list);
@@ -64,8 +70,7 @@ export async function load() {
 		destinations: (destinations ?? []).map((d) => ({
 			id: d.id,
 			name: d.name,
-			dates: dateRangesByDestination.get(d.id) ?? [],
-			sales_consultant: salesConsultantMap.get(d.sales_consultant_id)
+			dates: dateRangesByDestination.get(d.id) ?? []
 		})),
 		salesConsultants: salesConsultants ?? []
 	};
@@ -102,8 +107,10 @@ export const actions = {
 			
 			if (isUmrah) {
 				if (!musim) return { success: false, error: 'Sila pilih Musim Umrah.' };
-			} else if (!isHaji) {
-				// Untuk pakej selain Umrah dan Haji (outbound)
+			} else if (isHaji) {
+				// Untuk pakej Haji, tidak perlu field tambahan
+			} else {
+				// Untuk pakej Pelancongan (outbound)
 				if (!pelancongan) return { success: false, error: 'Sila pilih Pelancongan.' };
 				if (!tarikh) return { success: false, error: 'Sila pilih Tarikh Pelancongan.' };
 			}
@@ -119,8 +126,7 @@ export const actions = {
 				season_id: isUmrah ? musim : null,
 				category_id: isUmrah ? (kategori || null) : null,
 				destination_id: (!isUmrah && !isHaji) ? pelancongan : null,
-				outbound_date_id: (!isUmrah && !isHaji) ? tarikh : null,
-				category: isUmrah ? 'umrah' : isHaji ? 'haji' : 'outbound'
+				outbound_date_id: (!isUmrah && !isHaji) ? tarikh : null
 			}).select().single();
 
 			if (leadError) {

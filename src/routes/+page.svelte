@@ -8,6 +8,8 @@
 	const seasons = data?.seasons ?? [];
 	const packageTypes = data?.packageTypes ?? [];
 	const destinations = data?.destinations ?? [];
+	
+
 
 	let selectedSeason = $state('');
 	let selectedCategory = $state('');
@@ -338,7 +340,7 @@
 				</div>
 				{/if}
 			{/if}
-			{:else if selectedPackage && !['umrah', 'haji'].includes(data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase())}
+			{:else if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() === 'pelancongan'}
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="pelancongan" class="text-xs sm:text-sm font-semibold text-gray-700">Pelancongan<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
@@ -352,7 +354,7 @@
 				/>
 			</div>
 
-			{#if selectedDestination}
+			{#if selectedDestination && getDatesForDestination().length > 0}
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="tarikh" class="text-xs sm:text-sm font-semibold text-gray-700">Tarikh Pelancongan<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
@@ -365,6 +367,12 @@
 					name="tarikh"
 					required={true}
 				/>
+			</div>
+			{:else if selectedDestination && getDatesForDestination().length === 0}
+			<div class="flex flex-col gap-1.5 sm:gap-2">
+				<div class="p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
+					⚠️ Destinasi "{destinations.find(d => d.id === selectedDestination)?.name}" tidak memiliki tarikh yang tersedia. Sila pilih destinasi lain.
+				</div>
 			</div>
 			{/if}
 			{/if}
