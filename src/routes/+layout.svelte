@@ -10,6 +10,8 @@
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+	<!-- Preload logo untuk mencegah FOUC -->
+	<link rel="preload" href={brandLogo} as="image" />
 	<script src="https://cdn.tailwindcss.com"></script>
 	<script>
 		tailwind.config = {
@@ -36,19 +38,84 @@
 			}
 		}
 			</script>
-		<style>
-			:global(html), :global(body) {
-				margin: 0;
-				padding: 0;
-				font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-				background: #f7f7fb;
-				color: #1f2937;
+			<style>
+		:global(html), :global(body) {
+			margin: 0;
+			padding: 0;
+			font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+			background: #f7f7fb;
+			color: #1f2937;
+		}
+		
+		/* Mencegah FOUC pada logo */
+		:global(header img) {
+			width: auto !important;
+			height: 48px !important;
+			max-width: 192px !important;
+			object-fit: contain !important;
+			display: block !important;
+			/* Mencegah layout shift */
+			min-height: 48px !important;
+			/* Mencegah logo membesar */
+			flex-shrink: 0 !important;
+		}
+		
+		@media (min-width: 640px) {
+			:global(header img) {
+				height: 56px !important;
+				min-height: 56px !important;
 			}
-		</style>
+		}
+		
+		/* Memastikan logo tidak membesar saat loading */
+		:global(header img:not([src])) {
+			visibility: hidden;
+		}
+		
+		/* Fallback untuk mencegah logo membesar sebelum Tailwind dimuat */
+		:global(header img[src*="logorayharsvg"]) {
+			width: auto !important;
+			height: 48px !important;
+			max-width: 192px !important;
+		}
+		
+		@media (min-width: 640px) {
+			:global(header img[src*="logorayharsvg"]) {
+				height: 56px !important;
+			}
+		}
+		
+		/* Fallback untuk header sebelum Tailwind dimuat */
+		:global(header) {
+			position: sticky;
+			top: 0;
+			z-index: 10;
+			background-color: #942392;
+			box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+		}
+		
+		:global(.header-container) {
+			max-width: 1000px;
+			margin: 0 auto;
+			padding: 0 16px;
+			box-sizing: border-box;
+			height: 56px;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		
+		@media (min-width: 640px) {
+			:global(.header-container) {
+				padding: 0 24px;
+				height: 64px;
+			}
+		}
+	</style>
 </svelte:head>
 
 <header class="sticky top-0 z-10 bg-[#942392] shadow-sm">
-	<div class="max-w-[1000px] mx-auto px-4 sm:px-6 box-border h-14 sm:h-16 flex items-center justify-center">
+	<div class="header-container max-w-[1000px] mx-auto px-4 sm:px-6 box-border h-14 sm:h-16 flex items-center justify-center">
 		<img src={brandLogo} alt="Logo" class="h-12 sm:h-14 max-h-14 max-w-48 object-contain" />
 	</div>
 </header>
