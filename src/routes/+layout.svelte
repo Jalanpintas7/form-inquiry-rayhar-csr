@@ -1,6 +1,7 @@
 <script>
 	import favicon from '$lib/assets/favicon.svg';
 	import brandLogo from '$lib/assets/logorayharsvg.svg';
+	import '$lib/app.css';
 	
 	let { children } = $props();
 </script>
@@ -9,7 +10,6 @@
 		<link rel="icon" href={favicon} />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link rel="preconnect" href="https://cdn.tailwindcss.com" />
 		<link rel="preload" href={brandLogo} as="image" type="image/svg+xml" />
 		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
@@ -29,32 +29,6 @@
 			}
 		</style>
 
-		<script src="https://cdn.tailwindcss.com"></script>
-	<script>
-		tailwind.config = {
-			theme: {
-				extend: {
-					colors: {
-						'rayhar': {
-							50: '#f3e8ff',
-							100: '#e9d5ff',
-							200: '#d8b4fe',
-							300: '#c084fc',
-							400: '#a855f7',
-							500: '#9333ea',
-							600: '#942392',
-							700: '#942392',
-							800: '#942392',
-							900: '#942392',
-						}
-					},
-					fontFamily: {
-						'poppins': ['Poppins', 'system-ui', 'sans-serif'],
-					}
-				}
-			}
-		}
-			</script>
 		<style>
 			:global(html), :global(body) {
 				margin: 0;
