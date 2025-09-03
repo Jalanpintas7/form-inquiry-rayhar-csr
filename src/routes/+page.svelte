@@ -1,15 +1,29 @@
 <script>
 	import { onMount } from 'svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
+	import { loadInitialData, submitForm } from '$lib/services/api.js';
 	
-	// State untuk data form
-	let branches = $state([]);
-	let salesConsultants = $state([]);
-	let seasons = $state([]);
-	let packageTypes = $state([]);
-	let destinations = $state([]);
-	let isLoading = $state(true);
-	let loadError = $state(null);
+	let data = $state(null);
+	let loading = $state(true);
+	let error = $state(null);
+	let formResult = $state(null);
+	
+	const branches = $derived(data?.branches ?? []);
+	const salesConsultants = $derived(data?.salesConsultants ?? []);
+	const seasons = $derived(data?.seasons ?? []);
+	const packageTypes = $derived(data?.packageTypes ?? []);
+	const destinations = $derived(data?.destinations ?? []);
+	
+	onMount(async () => {
+		try {
+			data = await loadInitialData();
+		} catch (err) {
+			error = err.message;
+			console.error('Error loading data:', err);
+		} finally {
+			loading = false;
+		}
+	});
 	
 
 
@@ -22,28 +36,6 @@
 	let showSuccessMessage = $state(false);
 	let showErrorMessage = $state(false);
 	let messageText = $state('');
-	let isSubmitting = $state(false);
-
-	// Load data saat komponen mount
-	onMount(async () => {
-		try {
-			const response = await fetch('/api/form-data');
-			if (!response.ok) {
-				throw new Error('Failed to fetch form data');
-			}
-			const data = await response.json();
-			branches = data.branches;
-			salesConsultants = data.salesConsultants;
-			seasons = data.seasons;
-			packageTypes = data.packageTypes;
-			destinations = data.destinations;
-			isLoading = false;
-		} catch (error) {
-			console.error('Error loading form data:', error);
-			loadError = error.message;
-			isLoading = false;
-		}
-	});
 
 	// Convert data untuk dropdown
 	const gelaranOptions = $derived([
@@ -69,9 +61,23 @@
 		displayLabel: d.dates && d.dates.length > 0 ? d.name : `${d.name} (tidak tersedia)`
 	})));
 
+	// Removed form effects since we're using CSR now
 	$effect(() => {
 		const cats = getCategories();
 		if (!cats.find((c) => c.id === selectedCategory)) selectedCategory = '';
+	});
+
+	// Handle form submission result
+	$effect(() => {
+		if (formResult?.success === true) {
+			showSuccessMessage = true;
+			messageText = formResult.message || 'Terima kasih! Maklumat anda telah berjaya dihantar.';
+			// Reset form
+			resetForm();
+		} else if (formResult?.success === false) {
+			showErrorMessage = true;
+			messageText = formResult.error || 'Ralat sistem. Sila cuba lagi.';
+		}
 	});
 
 	function getCategories() {
@@ -195,53 +201,32 @@
 		showSuccessMessage = false;
 		showErrorMessage = false;
 		messageText = '';
+		formResult = null;
 	}
 
-	async function handleFormSubmit(event) {
+	// Handle form submission
+	async function handleSubmit(event) {
 		event.preventDefault();
-		isSubmitting = true;
-		showErrorMessage = false;
-		showSuccessMessage = false;
-
+		
 		const formData = new FormData(event.target);
-		const data = {
-			gelaran: formData.get('gelaran'),
-			nama: formData.get('nama'),
-			telefon: formData.get('telefon'),
-			cawangan: formData.get('cawangan'),
-			salesConsultant: formData.get('sales_consultant'),
-			pakej: formData.get('pakej'),
-			musim: formData.get('musim'),
-			kategori: formData.get('kategori'),
-			pelancongan: formData.get('pelancongan'),
-			tarikh: formData.get('tarikh')
+		const formObject = {
+			gelaran: formData.get('gelaran')?.toString().trim(),
+			nama: formData.get('nama')?.toString().trim(),
+			telefon: formData.get('telefon')?.toString().trim(),
+			cawangan: formData.get('cawangan')?.toString().trim(),
+			salesConsultant: formData.get('sales_consultant')?.toString().trim(),
+			pakej: formData.get('pakej')?.toString().trim(),
+			musim: formData.get('musim')?.toString().trim(),
+			kategori: formData.get('kategori')?.toString().trim(),
+			pelancongan: formData.get('pelancongan')?.toString().trim(),
+			tarikh: formData.get('tarikh')?.toString().trim()
 		};
 
 		try {
-			const response = await fetch('/api/submit-form', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify(data)
-			});
-
-			const result = await response.json();
-
-			if (result.success) {
-				showSuccessMessage = true;
-				messageText = result.message;
-				resetForm();
-			} else {
-				showErrorMessage = true;
-				messageText = result.error;
-			}
-		} catch (error) {
-			console.error('Error submitting form:', error);
-			showErrorMessage = true;
-			messageText = 'Ralat sistem. Sila cuba lagi.';
-		} finally {
-			isSubmitting = false;
+			formResult = await submitForm(formObject);
+		} catch (err) {
+			formResult = { success: false, error: 'Ralat sistem. Sila cuba lagi.' };
+			console.error('Form submission error:', err);
 		}
 	}
 </script>
@@ -250,6 +235,30 @@
 	<div class="text-center mb-4 sm:mb-5">
 		<h2 class="m-0 text-2xl sm:text-3xl font-bold tracking-wide">ISI MAKLUMAT ANDA</h2>
 	</div>
+
+	<!-- Loading State -->
+	{#if loading}
+		<div class="flex items-center justify-center p-8">
+			<div class="text-center">
+				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#942392] mx-auto mb-4"></div>
+				<p class="text-gray-600">Memuatkan data...</p>
+			</div>
+		</div>
+	{/if}
+
+	<!-- Error State -->
+	{#if error}
+		<div class="flex items-center justify-between p-3 sm:p-4 rounded-xl mb-4 sm:mb-6 max-w-[720px] mx-auto bg-red-50 border border-red-500 text-red-800">
+			<div class="flex items-center gap-2 sm:gap-3 flex-1">
+				<svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<circle cx="12" cy="12" r="10"></circle>
+					<line x1="15" y1="9" x2="9" y2="15"></line>
+					<line x1="9" y1="9" x2="15" y2="15"></line>
+				</svg>
+				<p class="m-0 text-xs sm:text-sm font-medium">Ralat memuatkan data: {error}</p>
+			</div>
+		</div>
+	{/if}
 
 	<!-- Success Message -->
 	{#if showSuccessMessage}
@@ -261,7 +270,7 @@
 				</svg>
 				<p class="m-0 text-xs sm:text-sm font-medium">{messageText}</p>
 			</div>
-			<button class="bg-transparent border-none text-lg sm:text-xl text-inherit cursor-pointer p-1 rounded transition-colors hover:bg-black/10 flex-shrink-0" on:click={closeMessage}>×</button>
+			<button class="bg-transparent border-none text-lg sm:text-xl text-inherit cursor-pointer p-1 rounded transition-colors hover:bg-black/10 flex-shrink-0" onclick={closeMessage}>×</button>
 		</div>
 	{/if}
 
@@ -276,34 +285,13 @@
 				</svg>
 				<p class="m-0 text-xs sm:text-sm font-medium">{messageText}</p>
 			</div>
-			<button class="bg-transparent border-none text-lg sm:text-xl text-inherit cursor-pointer p-1 rounded transition-colors hover:bg-black/10 flex-shrink-0" on:click={closeMessage}>×</button>
+			<button class="bg-transparent border-none text-lg sm:text-xl text-inherit cursor-pointer p-1 rounded transition-colors hover:bg-black/10 flex-shrink-0" onclick={closeMessage}>×</button>
 		</div>
 	{/if}
 
-	<!-- Loading State -->
-	{#if isLoading}
-		<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
-			<div class="flex items-center justify-center py-8">
-				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#942392]"></div>
-				<span class="ml-3 text-gray-600">Memuatkan data...</span>
-			</div>
-		</div>
-	{:else if loadError}
-		<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
-			<div class="text-center py-8">
-				<div class="text-red-500 mb-2">⚠️ Ralat memuatkan data</div>
-				<p class="text-gray-600 text-sm">{loadError}</p>
-				<button 
-					on:click={() => window.location.reload()} 
-					class="mt-4 px-4 py-2 bg-[#942392] text-white rounded-lg hover:brightness-105 transition-all"
-				>
-					Cuba Lagi
-				</button>
-			</div>
-		</div>
-	{:else}
-		<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
-			<form class="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-4" on:submit={handleFormSubmit}>
+	{#if !loading && !error}
+	<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
+		<form class="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-4" onsubmit={handleSubmit}>
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="gelaran" class="text-xs sm:text-sm font-semibold text-gray-700">Gelaran<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
@@ -327,8 +315,8 @@
 					type="tel" 
 					placeholder="Contoh: 01922322901" 
 					required 
-					on:input={handlePhoneInput}
-					on:keypress={handlePhoneKeyPress}
+					oninput={handlePhoneInput}
+					onkeypress={handlePhoneKeyPress}
 					class="h-10 sm:h-11 rounded-lg border border-gray-200 px-3 text-sm bg-white outline-none transition-all duration-120 focus:border-[#942392] focus:shadow-[0_0_0_3px_rgba(148,35,146,0.18)]"
 				/>
 			</div>
@@ -436,19 +424,8 @@
 			{/if}
 
 			<div class="mt-2 md:col-span-2">
-				<button 
-					type="submit" 
-					disabled={isSubmitting}
-					class="w-full h-[42px] sm:h-[46px] border-none rounded-lg text-white font-semibold tracking-wide bg-gradient-to-r from-[#942392] to-[#942392] shadow-lg shadow-purple-900/25 cursor-pointer hover:brightness-105 transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-				>
-					{#if isSubmitting}
-						<span class="flex items-center justify-center">
-							<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-							Menghantar...
-						</span>
-					{:else}
-						HANTAR
-					{/if}
+				<button type="submit" class="w-full h-[42px] sm:h-[46px] border-none rounded-lg text-white font-semibold tracking-wide bg-gradient-to-r from-[#942392] to-[#942392] shadow-lg shadow-purple-900/25 cursor-pointer hover:brightness-105 transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed">
+					HANTAR
 				</button>
 			</div>
 		</form>
