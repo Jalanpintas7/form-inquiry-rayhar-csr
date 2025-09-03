@@ -44,50 +44,12 @@
 				background: #f7f7fb;
 				color: #1f2937;
 			}
-			
-			/* Pastikan logo tidak membesar saat loading */
-			header img {
-				max-width: 125px !important;
-				height: auto !important;
-				object-fit: contain;
-			}
-			
-			/* Fix form shifting issue - CSS fallback sebelum Tailwind load */
-			:global(.form-container) {
-				max-width: 720px !important;
-				margin-left: auto !important;
-				margin-right: auto !important;
-			}
-			
-			:global(.loading-container) {
-				display: flex !important;
-				align-items: center !important;
-				justify-content: center !important;
-				padding: 2rem !important;
-			}
-			
-			:global(.loading-spinner) {
-				text-align: center !important;
-			}
-			
-			:global(.loading-spinner .spinner) {
-				animation: spin 1s linear infinite !important;
-				border-radius: 50% !important;
-				height: 2rem !important;
-				width: 2rem !important;
-				border-bottom: 2px solid #942392 !important;
-				margin: 0 auto 1rem auto !important;
-			}
-			
-			@keyframes spin {
-				to { transform: rotate(360deg); }
-			}
 		</style>
 </svelte:head>
 
 <header class="sticky top-0 z-10 bg-[#942392] shadow-sm">
 	<div class="max-w-[1000px] mx-auto px-4 sm:px-6 box-border h-14 sm:h-16 flex items-center justify-center">
-		<img src={brandLogo} alt="Logo" class="h-8 sm:h-10 w-auto max-w-[200px]" />
+		<img src={brandLogo} alt="Logo" class="h-12 sm:h-14" />
 	</div>
 </header>
 
