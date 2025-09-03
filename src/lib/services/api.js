@@ -4,11 +4,28 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-	throw new Error('Missing Supabase environment variables');
+// Better error handling for missing environment variables
+if (!supabaseUrl) {
+	console.error('❌ VITE_SUPABASE_URL is not set. Please check your environment variables.');
+	console.error('📝 For local development: Copy env.example to .env and fill in your values');
+	console.error('🌐 For Netlify: Go to Site Settings > Environment Variables and add VITE_SUPABASE_URL');
+	throw new Error('Missing VITE_SUPABASE_URL environment variable');
+}
+
+if (!supabaseAnonKey) {
+	console.error('❌ VITE_SUPABASE_ANON_KEY is not set. Please check your environment variables.');
+	console.error('📝 For local development: Copy env.example to .env and fill in your values');
+	console.error('🌐 For Netlify: Go to Site Settings > Environment Variables and add VITE_SUPABASE_ANON_KEY');
+	throw new Error('Missing VITE_SUPABASE_ANON_KEY environment variable');
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Debug info untuk environment variables
+console.log('🔧 Environment check:', {
+	supabaseUrl: supabaseUrl ? '✅ Set' : '❌ Missing',
+	supabaseAnonKey: supabaseAnonKey ? '✅ Set (length: ' + supabaseAnonKey.length + ')' : '❌ Missing'
+});
 
 // Fungsi untuk mengambil data awal
 export async function loadInitialData() {
