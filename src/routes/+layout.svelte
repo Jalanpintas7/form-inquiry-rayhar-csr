@@ -51,6 +51,37 @@
 				height: auto !important;
 				object-fit: contain;
 			}
+			
+			/* Fix form shifting issue - CSS fallback sebelum Tailwind load */
+			:global(.form-container) {
+				max-width: 720px !important;
+				margin-left: auto !important;
+				margin-right: auto !important;
+			}
+			
+			:global(.loading-container) {
+				display: flex !important;
+				align-items: center !important;
+				justify-content: center !important;
+				padding: 2rem !important;
+			}
+			
+			:global(.loading-spinner) {
+				text-align: center !important;
+			}
+			
+			:global(.loading-spinner .spinner) {
+				animation: spin 1s linear infinite !important;
+				border-radius: 50% !important;
+				height: 2rem !important;
+				width: 2rem !important;
+				border-bottom: 2px solid #942392 !important;
+				margin: 0 auto 1rem auto !important;
+			}
+			
+			@keyframes spin {
+				to { transform: rotate(360deg); }
+			}
 		</style>
 </svelte:head>
 
