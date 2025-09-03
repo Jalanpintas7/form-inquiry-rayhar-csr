@@ -44,12 +44,19 @@
 				background: #f7f7fb;
 				color: #1f2937;
 			}
+			
+			/* Pastikan logo tidak membesar saat loading */
+			header img {
+				max-width: 125px !important;
+				height: auto !important;
+				object-fit: contain;
+			}
 		</style>
 </svelte:head>
 
 <header class="sticky top-0 z-10 bg-[#942392] shadow-sm">
 	<div class="max-w-[1000px] mx-auto px-4 sm:px-6 box-border h-14 sm:h-16 flex items-center justify-center">
-		<img src={brandLogo} alt="Logo" class="h-12 sm:h-14 w-auto" />
+		<img src={brandLogo} alt="Logo" class="h-8 sm:h-10 w-auto max-w-[200px]" />
 	</div>
 </header>
 
