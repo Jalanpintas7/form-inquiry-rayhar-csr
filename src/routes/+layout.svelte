@@ -72,6 +72,63 @@
 				max-height: 100%;
 			}
 
+			/* Custom animations for smooth loading experience */
+			@keyframes smooth-spin {
+				from { transform: rotate(0deg); }
+				to { transform: rotate(360deg); }
+			}
+
+			@keyframes gentle-bounce {
+				0%, 20%, 53%, 80%, 100% { transform: translate3d(0, 0, 0); }
+				40%, 43% { transform: translate3d(0, -8px, 0); }
+				70% { transform: translate3d(0, -4px, 0); }
+				90% { transform: translate3d(0, -2px, 0); }
+			}
+
+			:global(.smooth-spin) {
+				animation: smooth-spin 1s linear infinite;
+			}
+
+			:global(.gentle-bounce) {
+				animation: gentle-bounce 2s ease-in-out infinite;
+			}
+
+			/* Smooth transitions for form appearance */
+			:global(.animate-in) {
+				animation-fill-mode: both;
+			}
+
+			:global(.fade-in-0) {
+				animation-name: fade-in;
+			}
+
+			:global(.slide-in-from-bottom-4) {
+				animation-name: slide-in-from-bottom;
+			}
+
+			:global(.slide-in-from-top-4) {
+				animation-name: slide-in-from-top;
+			}
+
+			:global(.duration-500) {
+				animation-duration: 500ms;
+			}
+
+			@keyframes fade-in {
+				from { opacity: 0; }
+				to { opacity: 1; }
+			}
+
+			@keyframes slide-in-from-bottom {
+				from { transform: translateY(1rem); opacity: 0; }
+				to { transform: translateY(0); opacity: 1; }
+			}
+
+			@keyframes slide-in-from-top {
+				from { transform: translateY(-1rem); opacity: 0; }
+				to { transform: translateY(0); opacity: 1; }
+			}
+
 			/* Ensure main content is properly centered */
 			:global(main) {
 				display: flex;

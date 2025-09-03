@@ -232,16 +232,36 @@
 </script>
 
 <section class="pt-6 sm:pt-10 px-4 sm:px-0">
-	<div class="text-center mb-4 sm:mb-5">
-		<h2 class="m-0 text-2xl sm:text-3xl font-bold tracking-wide">ISI MAKLUMAT ANDA</h2>
-	</div>
+	<!-- Title - hide during loading -->
+	{#if !loading}
+		<div class="text-center mb-4 sm:mb-5 animate-in fade-in-0 slide-in-from-top-4 duration-500" style="animation-delay: 200ms;">
+			<h2 class="m-0 text-2xl sm:text-3xl font-bold tracking-wide">ISI MAKLUMAT ANDA</h2>
+		</div>
+	{/if}
 
 	<!-- Loading State -->
 	{#if loading}
-		<div class="flex items-center justify-center p-8">
-			<div class="text-center">
-				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#942392] mx-auto mb-4"></div>
-				<p class="text-gray-600">Memuatkan data...</p>
+		<div class="text-center mb-4 sm:mb-5">
+			<h2 class="m-0 text-2xl sm:text-3xl font-bold tracking-wide text-gray-400">ISI MAKLUMAT ANDA</h2>
+		</div>
+		<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto w-full">
+			<div class="flex flex-col items-center justify-center min-h-[400px] py-12">
+				<!-- Circular Loading Indicator -->
+				<div class="relative mb-6">
+					<div class="smooth-spin rounded-full h-16 w-16 border-4 border-[#942392]/20 border-t-[#942392]"></div>
+					<div class="absolute inset-0 rounded-full border-4 border-transparent border-t-[#942392] smooth-spin" style="animation-duration: 1.5s;"></div>
+				</div>
+
+				<!-- Loading Text -->
+				<h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Memuatkan Data</h3>
+				<p class="text-gray-600 text-center max-w-sm">Sila tunggu sebentar, kami sedang menyediakan maklumat terkini untuk anda.</p>
+
+				<!-- Progress dots animation -->
+				<div class="flex space-x-1 mt-4">
+					<div class="w-2 h-2 bg-[#942392] rounded-full gentle-bounce" style="animation-delay: 0s;"></div>
+					<div class="w-2 h-2 bg-[#942392] rounded-full gentle-bounce" style="animation-delay: 0.2s;"></div>
+					<div class="w-2 h-2 bg-[#942392] rounded-full gentle-bounce" style="animation-delay: 0.4s;"></div>
+				</div>
 			</div>
 		</div>
 	{/if}
@@ -290,7 +310,7 @@
 	{/if}
 
 	{#if !loading && !error}
-	<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto w-full">
+	<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto w-full animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
 		<form class="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-4" onsubmit={handleSubmit}>
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="gelaran" class="text-xs sm:text-sm font-semibold text-gray-700">Gelaran<span class="text-red-500 ml-1">*</span></label>
