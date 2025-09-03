@@ -12,6 +12,26 @@
 		<link rel="preconnect" href="https://cdn.tailwindcss.com" />
 		<link rel="preload" href={brandLogo} as="image" type="image/svg+xml" />
 		<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+		<!-- Critical CSS for logo to prevent flash -->
+		<style>
+			.brand-logo {
+				width: 192px !important;
+				height: 48px !important;
+				max-width: 192px !important;
+				max-height: 56px !important;
+				min-width: 192px !important;
+				min-height: 48px !important;
+				display: block !important;
+			}
+			@media (min-width: 640px) {
+				.brand-logo {
+					height: 56px !important;
+					min-height: 56px !important;
+				}
+			}
+		</style>
+
 		<script src="https://cdn.tailwindcss.com"></script>
 	<script>
 		tailwind.config = {
@@ -71,6 +91,28 @@
 				max-height: 100% !important;
 			}
 
+			/* Force override intrinsic SVG dimensions */
+			:global(.brand-logo) {
+				width: 192px !important;
+				height: 48px !important;
+				max-width: 192px !important;
+				max-height: 56px !important;
+				min-width: 192px !important;
+				min-height: 48px !important;
+				image-rendering: -webkit-optimize-contrast !important;
+				image-rendering: crisp-edges !important;
+			}
+
+			/* Additional override for any SVG content */
+			:global(.brand-logo *),
+			:global(.brand-logo svg *),
+			:global(.brand-logo svg) {
+				width: 100% !important;
+				height: 100% !important;
+				max-width: 100% !important;
+				max-height: 100% !important;
+			}
+
 			/* Additional SVG reset for all images to prevent FOUC */
 			:global(img) {
 				max-width: 100%;
@@ -108,7 +150,14 @@
 
 <header class="sticky top-0 z-10 bg-[#942392] shadow-sm">
 	<div class="max-w-[1000px] mx-auto px-4 sm:px-6 box-border h-14 sm:h-16 flex items-center justify-center">
-		<img src={brandLogo} alt="Logo" class="brand-logo h-12 sm:h-14 max-h-14 max-w-48 object-contain" />
+		<img
+			src={brandLogo}
+			alt="Logo"
+			width="192"
+			height="56"
+			class="brand-logo h-12 sm:h-14 max-h-14 max-w-48 object-contain"
+			style="width: 192px; height: 48px; max-width: 192px; max-height: 56px;"
+		/>
 	</div>
 </header>
 
