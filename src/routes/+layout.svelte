@@ -49,7 +49,7 @@
 
 <header class="sticky top-0 z-10 bg-[#942392] shadow-sm">
 	<div class="max-w-[1000px] mx-auto px-4 sm:px-6 box-border h-14 sm:h-16 flex items-center justify-center">
-		<img src={brandLogo} alt="Logo" class="h-12 sm:h-14" />
+		<img src={brandLogo} alt="Logo" class="h-12 sm:h-14 max-h-14 max-w-48 object-contain" />
 	</div>
 </header>
 
