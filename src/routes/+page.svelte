@@ -290,7 +290,7 @@
 	{/if}
 
 	{#if !loading && !error}
-	<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
+	<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto w-full">
 		<form class="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-4" onsubmit={handleSubmit}>
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="gelaran" class="text-xs sm:text-sm font-semibold text-gray-700">Gelaran<span class="text-red-500 ml-1">*</span></label>

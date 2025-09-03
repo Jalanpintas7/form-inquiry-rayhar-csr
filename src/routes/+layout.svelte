@@ -16,18 +16,15 @@
 		<!-- Critical CSS for logo to prevent flash -->
 		<style>
 			.brand-logo {
-				width: 192px !important;
-				height: 48px !important;
-				max-width: 192px !important;
-				max-height: 56px !important;
-				min-width: 192px !important;
-				min-height: 48px !important;
-				display: block !important;
+				width: 192px;
+				height: 48px;
+				max-width: 192px;
+				max-height: 56px;
+				object-fit: contain;
 			}
 			@media (min-width: 640px) {
 				.brand-logo {
-					height: 56px !important;
-					min-height: 56px !important;
+					height: 56px;
 				}
 			}
 		</style>
@@ -67,83 +64,35 @@
 				color: #1f2937;
 			}
 
-			/* Fix logo flash issue - ensure proper sizing before Tailwind loads */
-			:global(.brand-logo) {
-				height: 48px !important; /* h-12 = 48px */
-				max-height: 56px !important; /* max-h-14 = 56px */
-				max-width: 192px !important; /* max-w-48 = 192px */
-				width: auto !important;
-				object-fit: contain !important;
-			}
-
-			/* Responsive sizing for larger screens */
-			@media (min-width: 640px) {
-				:global(.brand-logo) {
-					height: 56px !important; /* sm:h-14 = 56px */
-				}
-			}
-
-			/* Reset SVG sizing to prevent intrinsic dimensions */
+			/* Prevent SVG intrinsic sizing - more targeted approach */
 			:global(.brand-logo svg) {
-				width: 100% !important;
-				height: 100% !important;
-				max-width: 100% !important;
-				max-height: 100% !important;
-			}
-
-			/* Force override intrinsic SVG dimensions */
-			:global(.brand-logo) {
-				width: 192px !important;
-				height: 48px !important;
-				max-width: 192px !important;
-				max-height: 56px !important;
-				min-width: 192px !important;
-				min-height: 48px !important;
-				image-rendering: -webkit-optimize-contrast !important;
-				image-rendering: crisp-edges !important;
-			}
-
-			/* Additional override for any SVG content */
-			:global(.brand-logo *),
-			:global(.brand-logo svg *),
-			:global(.brand-logo svg) {
-				width: 100% !important;
-				height: 100% !important;
-				max-width: 100% !important;
-				max-height: 100% !important;
-			}
-
-			/* Additional SVG reset for all images to prevent FOUC */
-			:global(img) {
+				width: 100%;
+				height: 100%;
 				max-width: 100%;
-				height: auto;
+				max-height: 100%;
 			}
 
-			/* Ensure header is properly sized from the start */
-			:global(header) {
-				position: sticky;
-				top: 0;
-				z-index: 10;
-				background-color: #942392;
-				box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-			}
-
-			:global(header div) {
-				max-width: 1000px;
-				margin: 0 auto;
-				padding: 0 16px;
-				box-sizing: border-box;
-				height: 56px;
+			/* Ensure main content is properly centered */
+			:global(main) {
 				display: flex;
-				align-items: center;
-				justify-content: center;
+				flex-direction: column;
+				min-height: calc(100svh - 56px);
 			}
 
 			@media (min-width: 640px) {
-				:global(header div) {
-					padding: 0 24px;
-					height: 64px;
+				:global(main) {
+					min-height: calc(100svh - 64px);
 				}
+			}
+
+			/* Ensure proper centering of page content */
+			:global(main > div) {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+				padding: 1rem;
 			}
 		</style>
 </svelte:head>
@@ -156,7 +105,6 @@
 			width="192"
 			height="56"
 			class="brand-logo h-12 sm:h-14 max-h-14 max-w-48 object-contain"
-			style="width: 192px; height: 48px; max-width: 192px; max-height: 56px;"
 		/>
 	</div>
 </header>
