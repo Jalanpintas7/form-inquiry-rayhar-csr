@@ -1,13 +1,15 @@
 <script>
-	import { enhance } from '$app/forms';
+	import { onMount } from 'svelte';
 	import Dropdown from '$lib/components/Dropdown.svelte';
 	
-	let { data, form } = $props();
-	const branches = data?.branches ?? [];
-	const salesConsultants = data?.salesConsultants ?? [];
-	const seasons = data?.seasons ?? [];
-	const packageTypes = data?.packageTypes ?? [];
-	const destinations = data?.destinations ?? [];
+	// State untuk data form
+	let branches = $state([]);
+	let salesConsultants = $state([]);
+	let seasons = $state([]);
+	let packageTypes = $state([]);
+	let destinations = $state([]);
+	let isLoading = $state(true);
+	let loadError = $state(null);
 	
 
 
@@ -20,6 +22,28 @@
 	let showSuccessMessage = $state(false);
 	let showErrorMessage = $state(false);
 	let messageText = $state('');
+	let isSubmitting = $state(false);
+
+	// Load data saat komponen mount
+	onMount(async () => {
+		try {
+			const response = await fetch('/api/form-data');
+			if (!response.ok) {
+				throw new Error('Failed to fetch form data');
+			}
+			const data = await response.json();
+			branches = data.branches;
+			salesConsultants = data.salesConsultants;
+			seasons = data.seasons;
+			packageTypes = data.packageTypes;
+			destinations = data.destinations;
+			isLoading = false;
+		} catch (error) {
+			console.error('Error loading form data:', error);
+			loadError = error.message;
+			isLoading = false;
+		}
+	});
 
 	// Convert data untuk dropdown
 	const gelaranOptions = $derived([
@@ -46,33 +70,8 @@
 	})));
 
 	$effect(() => {
-		if (!selectedSeason && form?.musim) selectedSeason = form.musim;
-	});
-	$effect(() => {
-		if (!selectedCategory && form?.kategori) selectedCategory = form.kategori;
-	});
-	$effect(() => {
-		if (!selectedPackage && form?.pakej) selectedPackage = form.pakej;
-	});
-	$effect(() => {
-		if (!selectedSalesConsultant && form?.sales_consultant) selectedSalesConsultant = form.sales_consultant;
-	});
-	$effect(() => {
 		const cats = getCategories();
 		if (!cats.find((c) => c.id === selectedCategory)) selectedCategory = '';
-	});
-
-	// Handle form submission result
-	$effect(() => {
-		if (form?.success === true) {
-			showSuccessMessage = true;
-			messageText = form.message || 'Terima kasih! Maklumat anda telah berjaya dihantar.';
-			// Reset form
-			resetForm();
-		} else if (form?.success === false) {
-			showErrorMessage = true;
-			messageText = form.error || 'Ralat sistem. Sila cuba lagi.';
-		}
 	});
 
 	function getCategories() {
@@ -197,6 +196,54 @@
 		showErrorMessage = false;
 		messageText = '';
 	}
+
+	async function handleFormSubmit(event) {
+		event.preventDefault();
+		isSubmitting = true;
+		showErrorMessage = false;
+		showSuccessMessage = false;
+
+		const formData = new FormData(event.target);
+		const data = {
+			gelaran: formData.get('gelaran'),
+			nama: formData.get('nama'),
+			telefon: formData.get('telefon'),
+			cawangan: formData.get('cawangan'),
+			salesConsultant: formData.get('sales_consultant'),
+			pakej: formData.get('pakej'),
+			musim: formData.get('musim'),
+			kategori: formData.get('kategori'),
+			pelancongan: formData.get('pelancongan'),
+			tarikh: formData.get('tarikh')
+		};
+
+		try {
+			const response = await fetch('/api/submit-form', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data)
+			});
+
+			const result = await response.json();
+
+			if (result.success) {
+				showSuccessMessage = true;
+				messageText = result.message;
+				resetForm();
+			} else {
+				showErrorMessage = true;
+				messageText = result.error;
+			}
+		} catch (error) {
+			console.error('Error submitting form:', error);
+			showErrorMessage = true;
+			messageText = 'Ralat sistem. Sila cuba lagi.';
+		} finally {
+			isSubmitting = false;
+		}
+	}
 </script>
 
 <section class="pt-6 sm:pt-10 px-4 sm:px-0">
@@ -233,19 +280,30 @@
 		</div>
 	{/if}
 
-	<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
-		<form class="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-4" method="POST" use:enhance={() => {
-			return async ({ result }) => {
-				if (result.type === 'success') {
-					showSuccessMessage = true;
-					messageText = result.data?.message || 'Terima kasih! Maklumat anda telah berjaya dihantar.';
-					resetForm();
-				} else if (result.type === 'failure') {
-					showErrorMessage = true;
-					messageText = result.data?.error || 'Ralat sistem. Sila cuba lagi.';
-				}
-			};
-		}}>
+	<!-- Loading State -->
+	{#if isLoading}
+		<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
+			<div class="flex items-center justify-center py-8">
+				<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#942392]"></div>
+				<span class="ml-3 text-gray-600">Memuatkan data...</span>
+			</div>
+		</div>
+	{:else if loadError}
+		<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
+			<div class="text-center py-8">
+				<div class="text-red-500 mb-2">⚠️ Ralat memuatkan data</div>
+				<p class="text-gray-600 text-sm">{loadError}</p>
+				<button 
+					on:click={() => window.location.reload()} 
+					class="mt-4 px-4 py-2 bg-[#942392] text-white rounded-lg hover:brightness-105 transition-all"
+				>
+					Cuba Lagi
+				</button>
+			</div>
+		</div>
+	{:else}
+		<div class="bg-white border border-gray-200 rounded-2xl shadow-lg p-4 sm:p-7 max-w-[720px] mx-auto">
+			<form class="grid grid-cols-1 md:grid-cols-2 gap-4 gap-y-4" on:submit={handleFormSubmit}>
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="gelaran" class="text-xs sm:text-sm font-semibold text-gray-700">Gelaran<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
@@ -308,7 +366,7 @@
 				/>
 			</div>
 
-			{#if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() === 'umrah'}
+			{#if selectedPackage && packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() === 'umrah'}
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="musim" class="text-xs sm:text-sm font-semibold text-gray-700">Musim Umrah<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
@@ -335,12 +393,12 @@
 				{:else}
 				<div class="flex flex-col gap-1.5 sm:gap-2">
 					<div class="p-3 rounded-lg bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm">
-						⚠️ Musim "{data.seasons.find(s => s.id === selectedSeason)?.name}" tidak memiliki kategori umrah yang tersedia. Sila pilih musim lain.
+						⚠️ Musim "{seasons.find(s => s.id === selectedSeason)?.name}" tidak memiliki kategori umrah yang tersedia. Sila pilih musim lain.
 					</div>
 				</div>
 				{/if}
 			{/if}
-			{:else if selectedPackage && data.packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() === 'pelancongan'}
+			{:else if selectedPackage && packageTypes.find(p => p.id === selectedPackage)?.name?.toLowerCase() === 'pelancongan'}
 			<div class="flex flex-col gap-1.5 sm:gap-2">
 				<label for="pelancongan" class="text-xs sm:text-sm font-semibold text-gray-700">Pelancongan<span class="text-red-500 ml-1">*</span></label>
 				<Dropdown 
@@ -378,8 +436,22 @@
 			{/if}
 
 			<div class="mt-2 md:col-span-2">
-				<button type="submit" class="w-full h-[42px] sm:h-[46px] border-none rounded-lg text-white font-semibold tracking-wide bg-gradient-to-r from-[#942392] to-[#942392] shadow-lg shadow-purple-900/25 cursor-pointer hover:brightness-105 transition-all text-sm sm:text-base">HANTAR</button>
+				<button 
+					type="submit" 
+					disabled={isSubmitting}
+					class="w-full h-[42px] sm:h-[46px] border-none rounded-lg text-white font-semibold tracking-wide bg-gradient-to-r from-[#942392] to-[#942392] shadow-lg shadow-purple-900/25 cursor-pointer hover:brightness-105 transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+				>
+					{#if isSubmitting}
+						<span class="flex items-center justify-center">
+							<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+							Menghantar...
+						</span>
+					{:else}
+						HANTAR
+					{/if}
+				</button>
 			</div>
 		</form>
 	</div>
+	{/if}
 </section>
