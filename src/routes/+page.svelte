@@ -7,6 +7,7 @@
 	let loading = $state(true);
 	let error = $state(null);
 	let formResult = $state(null);
+	let isSubmitting = $state(false);
 	
 	const branches = $derived(data?.branches ?? []);
 	const salesConsultants = $derived(data?.salesConsultants ?? []);
@@ -208,6 +209,9 @@
 	async function handleSubmit(event) {
 		event.preventDefault();
 		
+		// Set loading state
+		isSubmitting = true;
+		
 		const formData = new FormData(event.target);
 		const formObject = {
 			gelaran: formData.get('gelaran')?.toString().trim(),
@@ -227,6 +231,9 @@
 		} catch (err) {
 			formResult = { success: false, error: 'Ralat sistem. Sila cuba lagi.' };
 			console.error('Form submission error:', err);
+		} finally {
+			// Reset loading state
+			isSubmitting = false;
 		}
 	}
 </script>
@@ -444,8 +451,14 @@
 			{/if}
 
 			<div class="mt-2 md:col-span-2">
-				<button type="submit" class="w-full h-[42px] sm:h-[46px] border-none rounded-lg text-white font-semibold tracking-wide bg-gradient-to-r from-[#942392] to-[#942392] shadow-lg shadow-purple-900/25 cursor-pointer hover:brightness-105 transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed">
-					HANTAR
+				<button type="submit" disabled={isSubmitting} class="w-full h-[42px] sm:h-[46px] border-none rounded-lg text-white font-semibold tracking-wide bg-gradient-to-r from-[#942392] to-[#942392] shadow-lg shadow-purple-900/25 cursor-pointer hover:brightness-105 transition-all text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+					{#if isSubmitting}
+						<!-- Circular Progress Indicator -->
+						<div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+						<span>MENGHANTAR...</span>
+					{:else}
+						<span>HANTAR</span>
+					{/if}
 				</button>
 			</div>
 		</form>

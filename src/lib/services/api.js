@@ -47,7 +47,7 @@ export async function loadInitialData() {
 				.select('umrah_season_id, umrah_category_id'),
 			supabase.from('package_types').select('id, name').order('name'),
 			supabase.from('destinations').select('id, name').order('name'),
-			supabase.from('outbound_dates').select('id, destination_id, start_date, end_date').order('destination_id'),
+			supabase.from('outbound_dates').select('id, destination_id, start_date, end_date').order('start_date', { ascending: true }),
 			supabase.from('sales_consultant').select('id, name, sales_consultant_number, whatsapp_number').order('sales_consultant_number'),
 			supabase.from('umrah_categories').select('id, name').order('name')
 		]);
@@ -69,15 +69,20 @@ export async function loadInitialData() {
 			categoriesBySeason.set(row.umrah_season_id, list);
 		}
 
-		// Mapping destinasi -> senarai tarikh
+		// Mapping destinasi -> senarai tarikh (sudah diurutkan berdasarkan start_date)
 		const dateRangesByDestination = new Map();
 		for (const od of outboundDates ?? []) {
 			const list = dateRangesByDestination.get(od.destination_id) ?? [];
 			if (od.start_date && od.end_date) {
 				const dateRange = `${od.start_date} - ${od.end_date}`;
-				list.push({ id: od.id, date_range: dateRange });
+				list.push({ id: od.id, date_range: dateRange, start_date: od.start_date });
 			}
 			dateRangesByDestination.set(od.destination_id, list);
+		}
+
+		// Urutkan tarikh untuk setiap destinasi berdasarkan start_date (terdekat dulu)
+		for (const [destinationId, dates] of dateRangesByDestination) {
+			dates.sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
 		}
 
 		// Mapping sales consultant
